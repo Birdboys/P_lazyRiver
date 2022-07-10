@@ -15,13 +15,17 @@ class ObstacleManager:
 		self.screen_height = HEIGHT
 		self.hit = False
 		self.spawn_list = []
-		self.spawn_prob = [0.4, 0.3, 0.3]
-
+		self.spawn_prob = [0, 0, 1]#[0.4, 0.3, 0.3]
+		self.obstacle_hit = pygame.image.load('Assets\\Obstacle\\obstacle_1_hit_sprites.png').convert_alpha()
+		self.obstacle_bounced = pygame.image.load('Assets\\Obstacle\\obstacle_1_bounced_sprites.png').convert_alpha()
+		self.obstacle_swim = pygame.image.load('Assets\\Obstacle\\obstacle_1_swimming_sprites.png').convert_alpha()
+		self.obstacle_sheets = {'SWIMMING':self.obstacle_swim, 'HIT':self.obstacle_hit, 'BOUNCED':self.obstacle_bounced, 'DEAD':self.obstacle_hit}
 	def update(self, surface):
 
 		for obstacle in self.obstacle_list:
+			obstacle.frame += 1
 			obstacle.update()
-			if obstacle.get_end_screen():
+			if obstacle.get_end_screen() or obstacle.state == 'DEAD':
 				self.obstacle_list.remove(obstacle)
 		for coin in self.coin_list:
 			coin.update()
@@ -55,7 +59,8 @@ class ObstacleManager:
 
 	def render_obstacles(self, surface):
 		for obstacle in self.obstacle_list:
-			surface.blit(obstacle.img, obstacle.rect)
+			surface.blit(self.get_obs_sprite(obstacle), obstacle.rect)
+
 
 	def render_coins(self, surface):
 		for coin in self.coin_list:
@@ -85,7 +90,7 @@ class ObstacleManager:
 				if pygame.Rect.colliderect(item.rect, thing.rect):
 					works = False
 
-			if works and num_ob <= 2:
+			if works:
 				self.spawn_list.append(thing)
 			#print("WORK")
 		for guy in self.spawn_list:
@@ -112,4 +117,16 @@ class ObstacleManager:
 		self.obstacle_list = []
 		self.coin_list = []
 		self.snorkle_list = []
+
+	def get_obs_sprite(self, obs):
+
+		surf = pygame.Surface((128, 128)).convert_alpha()
+
+		temp = obs.frame//4
+		surf.blit(self.obstacle_sheets[obs.state], (0,0), ((obs.preset * self.obstacle_sheets[obs.state].get_width()/2) + (temp * 128),0, (obs.preset * self.obstacle_sheets[obs.state].get_width()/2) + ((1+temp) * 128),128))
+		surf = pygame.transform.scale(surf, (obs.OBSTACLE_WITDH, obs.OBSTACLE_HEIGHT))
+		surf.set_colorkey((0,0,0))
+
+		return surf
+
 

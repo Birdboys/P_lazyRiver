@@ -97,6 +97,7 @@ class SwimState(State):
 			new_state = PauseState(self.game)
 			new_state.enter_state()
 
+		self.game.backgroundManager.update()
 		self.game.obsManager.update(self.game.game_canvas)
 		self.game.player.update(self.game.game_canvas,self.game.obsManager.get_obstacles(), self.game.obsManager.get_coins(), self.game.obsManager.get_snorkle())
 		
@@ -116,6 +117,7 @@ class SwimState(State):
 
 	def render(self, surface):
 		surface.fill((0,153,153))
+		self.game.backgroundManager.render(surface)
 		self.game.obsManager.render(surface)
 		self.game.player.render(surface)
 		surface.blit(self.hp_render, self.hp_rect)

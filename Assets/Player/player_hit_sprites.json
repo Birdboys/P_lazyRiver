@@ -1,28 +1,25 @@
 { "frames": {
-   "player_hit_sprites 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 32, "h": 32 },
+   "player_hit_sprites.png": {
+    "frame": { "x": 0, "y": 0, "w": 256, "h": 128 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
-    "sourceSize": { "w": 32, "h": 32 },
-    "duration": 100
-   },
-   "player_hit_sprites 1.aseprite": {
-    "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
-    "sourceSize": { "w": 32, "h": 32 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 256, "h": 128 },
+    "sourceSize": { "w": 256, "h": 128 },
     "duration": 100
    }
  },
  "meta": {
   "app": "https://www.aseprite.org/",
   "version": "1.2.35-x64",
-  "image": "player_hit_sprites.png",
+  "image": "player_hit_sprites-sheet.png",
   "format": "RGBA8888",
-  "size": { "w": 64, "h": 32 },
+  "size": { "w": 256, "h": 128 },
   "scale": "1",
+  "frameTags": [
+  ],
+  "layers": [
+   { "name": "Layer", "opacity": 255, "blendMode": "normal" }
+  ],
   "slices": [
   ]
  }

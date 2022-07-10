@@ -4,23 +4,48 @@ import random
 
 class Obstacle:
 
-	OBSTACLE_WITDH = 60
-	OBSTACLE_HEIGHT = 60 
+	OBSTACLE_WITDH = 80
+	OBSTACLE_HEIGHT = 80 
 	def __init__(self, x, y):
 		self.img = pygame.transform.scale(pygame.image.load('Assets/temp_obstacle.png').convert_alpha(),(Obstacle.OBSTACLE_WITDH, Obstacle.OBSTACLE_HEIGHT))
 		self.rect = pygame.Rect(x, y, Obstacle.OBSTACLE_WITDH, Obstacle.OBSTACLE_HEIGHT)
 		self.type = 'Obstacle'
 		self.vel_x = 0
-		self.vel_y = -5 + random.randint(-1,1)
+		self.vel_y = -4 + random.randint(-1,1)
+		self.state = 'SWIMMING'
+		self.preset = random.randint(0,1)
+		self.frame = 0
+		self.hit_timer = 0
+		self.bounced_timer = 0
 
-	def render(self, screen):
-		screen.blit(self.img, self.rect)
+	"""def render(self, screen):
+		screen.blit(self.img, self.rect)"""
 
 	def update(self):
 
-		#MOVE
-		self.rect.x += self.vel_x
-		self.rect.y += self.vel_y
+		match self.state:
+			case 'SWIMMING':
+				self.rect.x += self.vel_x
+				self.rect.y += self.vel_y
+				self.frame = 0
+
+			case 'HIT':
+				self.frame = self.frame % (8 * 4)
+
+				if pygame.time.get_ticks()-self.hit_timer > 1000:
+					self.state = 'DEAD'
+
+			case 'BOUNCED':
+				self.frame = self.frame % (4 * 4)
+				self.rect.x += int(self.vel_x * 0.75)
+				self.rect.y += int(self.vel_y * 0.75)
+
+				if pygame.time.get_ticks()-self.bounced_timer > 5000:
+					self.state = 'SWIMMING'
+
+
+			case _:
+				pass
 
 	def get_end_screen(self):
 
@@ -34,6 +59,21 @@ class Obstacle:
 			return True
 		else:
 			return False
+
+	def hit(self):
+		self.state = 'HIT'
+		self.hit_timer = pygame.time.get_ticks()
+
+	def bouncy(self):
+		if self.state == 'BOUNCED':
+			#print("OH FUCK OWY")
+			self.state = 'HIT'
+			self.hit_timer = pygame.time.get_ticks()
+			#print(self.state)
+		else:
+			self.state = 'BOUNCED'
+			self.bounced_timer = pygame.time.get_ticks()
+
 
 class Noodle(Obstacle):
 	NOODLE_WIDTH = 100
@@ -72,6 +112,10 @@ class Coin(Obstacle):
 		self.type = 'Coin'
 		self.vel_x = 0
 		self.vel_y = -5
+
+	def update(self):
+		self.rect.x += self.vel_x
+		self.rect.y += self.vel_y
 
 	def get_end_screen(self):
 

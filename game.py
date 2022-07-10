@@ -5,6 +5,7 @@ from player import Player
 from obstacle import Obstacle
 from obstacleManager import ObstacleManager
 from state import *
+from backgroundManager import *
 
 class Game:
 
@@ -26,8 +27,9 @@ class Game:
 
 		self.player = Player(self.WIDTH,self.HEIGHT)
 		self.obsManager = ObstacleManager(self.game_canvas, self.WIDTH, self.HEIGHT)
+		self.backgroundManager = BackgroundManager(self)
 
-		self.player_stats = {'hp':5,'money':20,'max_vel_x':4, 'max_vel_y':3,'noodle_upgrade':0, 'speedo_upgrade':0}
+		self.player_stats = {'hp':3,'money':20,'max_vel_x':4, 'max_vel_y':3,'noodle_upgrade':0, 'speedo_upgrade':0}
 		self.playing = True
 		self.running = True
 		self.state_stack = [TitleState(self)]
@@ -63,3 +65,9 @@ class Game:
 
 	def speedoObtained(self):
 		self.player_stats['speedo_upgrade'] = 1
+
+	def getSprite(self, image, width, height, p1, p2):
+		image = pygame.Surface((width, height)).convert_alpha()
+		image.blit(sheet, (0,0), (p1[0],p1[1],p2[0],p2[1]))
+		return pygame.transform.scale(image, (width, height))
+

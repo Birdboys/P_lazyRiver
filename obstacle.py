@@ -4,10 +4,10 @@ import random
 
 class Obstacle:
 
-	OBSTACLE_WITDH = 80
+	OBSTACLE_WIDTH = 80
 	OBSTACLE_HEIGHT = 80 
 	def __init__(self, x, y):
-		self.rect = pygame.Rect(x, y, Obstacle.OBSTACLE_WITDH, Obstacle.OBSTACLE_HEIGHT)
+		self.rect = pygame.Rect(x, y, Obstacle.OBSTACLE_WIDTH, Obstacle.OBSTACLE_HEIGHT)
 		self.type = 'Obstacle'
 		self.vel_x = 0
 		self.vel_y = -4 + random.randint(-1,1)
@@ -130,7 +130,7 @@ class Coin(Obstacle):
 			return 5
 		else:
 			return 1
-			
+
 class Snorkle(Obstacle):
 	
 	SNORKLE_WIDTH = 80
@@ -155,7 +155,7 @@ class Snorkle(Obstacle):
 			self.frame = self.frame % (7 * 4)
 
 		if self.state == 'ACTIVATED':
-			self.frame = self.frame % (4 * 4)
+			self.frame = self.frame % (16 * 4)
 			if (pygame.time.get_ticks()-self.activate_timer)/1000 >= 2:
 				self.state = 'SWIMMING'
 

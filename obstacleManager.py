@@ -55,15 +55,15 @@ class ObstacleManager:
 		self.render_snorkle(surface)
 
 	def add_obstacle(self):
-		obx = random.randint(0,350)
+		obx = random.randint(16,400 - Obstacle.OBSTACLE_WIDTH - 16)
 		return Obstacle(obx, 820 + (random.randint(-50,50)))
 
 	def add_coin(self):
-		obx = random.randint(25, 350)
+		obx = random.randint(16,400 - Coin.COIN_WIDTH - 16)
 		return Coin(obx, 820 + (random.randint(-50,50)))
 
 	def add_snorkle(self):
-		obx = random.randint(50, 300)
+		obx = random.randint(16,400 - Snorkle.SNORKLE_WIDTH - 16)
 		return Snorkle(obx, 820 + (random.randint(-50,50)))
 
 	def render_obstacles(self, surface):
@@ -112,7 +112,7 @@ class ObstacleManager:
 
 	def spawn_coins(self, num):
 
-		num = num + random.randint(0,1) - 1
+		num = num + random.randint(0,10)//10 - 1
 		for x in range(num):
 			thing = self.add_coin()
 			self.coin_list.append(thing)
@@ -137,7 +137,7 @@ class ObstacleManager:
 
 		temp = obs.frame//4
 		surf.blit(self.obstacle_sheets[obs.state], (0,0), ((obs.preset * self.obstacle_sheets[obs.state].get_width()/2) + (temp * 128),0, (obs.preset * self.obstacle_sheets[obs.state].get_width()/2) + ((1+temp) * 128),128))
-		surf = pygame.transform.scale(surf, (obs.OBSTACLE_WITDH, obs.OBSTACLE_HEIGHT))
+		surf = pygame.transform.scale(surf, (obs.OBSTACLE_WIDTH, obs.OBSTACLE_HEIGHT))
 		surf.set_colorkey((0,0,0))
 
 		return surf

@@ -202,10 +202,10 @@ class Player:
 			self.vel_y = 0
 		if self.rect.y + Player.PLAYER_HEIGHT > self.GAME_HEIGHT:
 			self.y = self.GAME_HEIGHT - Player.PLAYER_HEIGHT
-		if self.rect.x < 0:
-			self.rect.x = 0
-		if self.rect.x + Player.PLAYER_WIDTH > self.GAME_WIDTH:
-			self.rect.x = self.GAME_WIDTH - Player.PLAYER_WIDTH
+		if self.rect.x - 10 < 0:
+			self.rect.x = 10
+		if self.rect.x + Player.PLAYER_WIDTH + 10> self.GAME_WIDTH:
+			self.rect.x = self.GAME_WIDTH - Player.PLAYER_WIDTH - 10
 
 
 	def get_rect(self):

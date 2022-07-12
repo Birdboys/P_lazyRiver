@@ -16,7 +16,7 @@ class BackgroundManager():
 
 	def update(self):
 
-		#self.make_water_effect()
+		self.make_water_effect()
 		for effect in self.water_effects:
 			effect.update()
 			if effect.reached_end():
@@ -92,7 +92,7 @@ class WaterBoy():
 		t = random.randint(0,2)
 		match t:
 			case 0:
-				self.color = (0,153,219)
+				self.color = (18,78,137)
 				self.vel = -1
 			case 1:
 				self.color = (44,232,245)

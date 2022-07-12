@@ -1,6 +1,8 @@
 import pygame
 import numpy as np
 import os
+from particle import Particle
+import random 
 class Player:
 
 	ACCELERATION_X = 1
@@ -28,7 +30,8 @@ class Player:
 		self.bounce_time = 2000
 		self.money = 0
 		self.frame = 0
-		self.part_list = []
+		self.bounce_part_list = []
+		self.coin_part_list = []
 		
 
 	def update(self,screen, obstacles, coins, snorklers):
@@ -37,6 +40,7 @@ class Player:
 			self.descelerate()
 			self.rect.x += self.vel_x
 			self.rect.y += self.vel_y
+			#self.generate_swim_parts()
 			self.coin_hit_check(coins)
 			self.state = self.obstacle_hit_check(obstacles)
 			self.snorkle_hit_check(snorklers)
@@ -69,6 +73,7 @@ class Player:
 			#self.images['BOUNCE'] = pygame.transform.scale(self.images['BOUNCE'], (Player.PLAYER_WIDTH + int(25 * scale), Player.PLAYER_HEIGHT + int(25 * scale)))
 			
 			if delta >= self.bounce_time:
+				self.generate_land_parts()
 				self.bounce_timer = 0
 				#self.images['BOUNCE'] = pygame.transform.scale(self.images['BOUNCE'], (Player.PLAYER_WIDTH, Player.PLAYER_HEIGHT))
 
@@ -76,15 +81,20 @@ class Player:
 					self.state = 'HIT'
 					self.hit_timer = pygame.time.get_ticks()
 				else:
+					
 					self.state = 'SWIMMING'
 			elif delta >= self.bounce_time-self.bounce_time/10:
 				self.coin_hit_check(coins)
 				if self.check_rebound(obstacles):
+					self.generate_land_parts()
 					self.bounce_timer = pygame.time.get_ticks()
 					#self.images['BOUNCE'] = pygame.transform.scale(self.images['BOUNCE'], (Player.PLAYER_WIDTH, Player.PLAYER_HEIGHT))
 
 			self.vel_x = 0
 			self.vel_y = 0
+		if self.bounce_part_list or self.coin_part_list:
+			self.update_parts()
+		
 		self.border_check()	
 
 	def render(self, screen):
@@ -117,9 +127,13 @@ class Player:
 
 			case _:
 				val = 0
+		if self.bounce_part_list:
+			self.render_bounce_parts(screen)
 		image = self.get_sprite(self.images[self.state], 128, 128, (128 * val, 0),(128 * (val + 1), 128), scale)
 
 		screen.blit(image, self.rect)
+		if self.coin_part_list:
+			self.render_coin_parts(screen)
 
 	def reset(self, hp,money):
 		self.bounce_timer = 0
@@ -222,7 +236,11 @@ class Player:
 	def coin_hit_check(self, coins):
 		for coin in coins:
 			if pygame.Rect.colliderect(self.rect, coin.rect):
-				self.money += 1
+				self.money += coin.val
+				if coin.val > 1:
+					self.generate_coin_parts((99,199,77))
+				else:
+					self.generate_coin_parts((254,172,54))
 				coins.remove(coin)
 
 	def snorkle_hit_check(self, snorkles):
@@ -243,21 +261,18 @@ class Player:
 	def check_rebound(self, obstacles):
 		rebound = False
 		for obstacle in obstacles:
-			if pygame.Rect.colliderect(self.rect, obstacle.rect):
+			if pygame.Rect.colliderect(self.rect, obstacle.rect)  and self.get_distance(obstacle) < 60:
 					if obstacle.state == 'BOUNCED':
 						self.hit()
 					rebound = True
 					obstacle.bouncy()
-			
-				
-				
 
 		return rebound
 
 	def check_rebound_snorkle(self, snorkles):
 		hit = False
 		for snorkler in snorkles:
-			if pygame.Rect.colliderect(self.rect, snorkler.rect):
+			if pygame.Rect.colliderect(self.rect, snorkler.rect) and self.get_distance(snorkler) < 60:
 				snorkler.stomp()
 				self.hit()
 				hit = True
@@ -281,7 +296,48 @@ class Player:
 		surf.set_colorkey((0,0,0))
 		return surf
 
-class
+	def update_parts(self):
+		for part in self.bounce_part_list:
+			part.update()
+			if part.radius <= 0:
+				self.bounce_part_list.remove(part)
+
+		for part in self.coin_part_list:
+			part.update()
+			if part.radius <= 0:
+				self.coin_part_list.remove(part)
+
+	def render_bounce_parts(self, surface):
+		for part in self.bounce_part_list:
+			part.render(surface)
+
+	def render_coin_parts(self, surface):
+		for part in self.coin_part_list:
+			part.render(surface)
+	def generate_land_parts(self):
+		part_center = (self.rect.x + self.rect.width/2,self.rect.y + self.rect.height/4)
+
+		for x in range(0,40):
+			self.bounce_part_list.append(Particle(part_center[0],part_center[1], random.randint(0,20)/10-1, random.randint(0,20)/10-1, (255,255,255),-.2))
+
+	def generate_swim_parts(self):
+
+		if self.vel_y > 0:
+			for x in range(0,5):
+				part_center = (self.rect.x + self.rect.width/2 + random.randint(-3,3),self.rect.y + self.rect.height)
+				self.bounce_part_list.append(Particle(part_center[0],part_center[1], -self.vel_x/self.stats['max_vel_x'], -1 + self.vel_y, 0.2))
+
+	def generate_coin_parts(self, color):
+		for x in range(0,20):
+			part_center = (self.rect.x + self.rect.width/2 + random.randint(-50,50),self.rect.y + 3 *self.rect.height/4 + random.randint(-10,10))
+			self.coin_part_list.append(Particle(part_center[0],part_center[1], 0, random.randint(-3,-1), color, random.randint(4,6)))
+			
+		print(len(self.coin_part_list))
+
+
+
+
+
 
 				
 

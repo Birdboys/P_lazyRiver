@@ -7,7 +7,6 @@ class Obstacle:
 	OBSTACLE_WITDH = 80
 	OBSTACLE_HEIGHT = 80 
 	def __init__(self, x, y):
-		self.img = pygame.transform.scale(pygame.image.load('Assets/temp_obstacle.png').convert_alpha(),(Obstacle.OBSTACLE_WITDH, Obstacle.OBSTACLE_HEIGHT))
 		self.rect = pygame.Rect(x, y, Obstacle.OBSTACLE_WITDH, Obstacle.OBSTACLE_HEIGHT)
 		self.type = 'Obstacle'
 		self.vel_x = 0
@@ -103,17 +102,19 @@ class Noodle(Obstacle):
 
 class Coin(Obstacle):
 
-	COIN_WIDTH = 25
-	COIN_HEIGHT = 25
+	COIN_WIDTH = 50
+	COIN_HEIGHT = 50
 
 	def __init__(self, x, y):
-		self.img = pygame.transform.scale(pygame.image.load('Assets/temp_coin.png').convert_alpha(),(Coin.COIN_WIDTH, Coin.COIN_HEIGHT))
 		self.rect = pygame.Rect(x, y, Coin.COIN_WIDTH, Coin.COIN_HEIGHT)
 		self.type = 'Coin'
 		self.vel_x = 0
-		self.vel_y = -5
+		self.vel_y = -5 + random.randint(-1,1)
+		self.frame = random.randint(0,40)
+		self.val = self.get_val()
 
 	def update(self):
+		self.frame = self.frame % (10*4)
 		self.rect.x += self.vel_x
 		self.rect.y += self.vel_y
 
@@ -124,16 +125,19 @@ class Coin(Obstacle):
 		else:
 			return False
 
+	def get_val(self):
+		if random.uniform(0,1) <= 0.1:
+			return 5
+		else:
+			return 1
+			
 class Snorkle(Obstacle):
 	
-	SNORKLE_WIDTH = 50
-	SNORKLE_HEIGHT = 50
+	SNORKLE_WIDTH = 80
+	SNORKLE_HEIGHT = 80
 
 	def __init__(self, x, y):
-		self.img_swim = pygame.transform.scale(pygame.image.load('Assets/temp_snorkle.png').convert_alpha(),(Snorkle.SNORKLE_WIDTH, Snorkle.SNORKLE_HEIGHT))
-		self.img_act = pygame.transform.scale(pygame.image.load('Assets/temp_snorkle_activated.png').convert_alpha(),(Snorkle.SNORKLE_WIDTH, Snorkle.SNORKLE_HEIGHT))
-		self.img_stomped = pygame.transform.scale(pygame.image.load('Assets/temp_snorkle_stomped.png').convert_alpha(),(Snorkle.SNORKLE_WIDTH, Snorkle.SNORKLE_HEIGHT))
-		self.images = {'SWIMMING':self.img_swim, 'ACTIVATED' : self.img_act, 'STOMPED' : self.img_stomped, 'GONE' : self.img_stomped}
+	
 		self.rect = pygame.Rect(x, y, Snorkle.SNORKLE_WIDTH, Snorkle.SNORKLE_HEIGHT)
 		self.vel_y = -4 + random.randint(-1,1)
 		self.vel_x = 0
@@ -141,19 +145,23 @@ class Snorkle(Obstacle):
 		self.activate_timer = 0
 		self.used = False
 		self.type = 'Snorkle'
+		self.frame = 0
 
 	def update(self):
 
 		if self.state == 'SWIMMING':
 			self.rect.x += self.vel_x
 			self.rect.y += self.vel_y
-			return False
+			self.frame = self.frame % (7 * 4)
 
 		if self.state == 'ACTIVATED':
+			self.frame = self.frame % (4 * 4)
 			if (pygame.time.get_ticks()-self.activate_timer)/1000 >= 2:
 				self.state = 'SWIMMING'
 
+
 		if self.state == 'STOMPED':
+			self.frame = self.frame % (6 * 4)
 			if (pygame.time.get_ticks()-self.activate_timer)/1000 >= 1:
 				self.state = 'GONE'
 				self.used = True

@@ -75,12 +75,10 @@ class SwimState(State):
 				self.game.running = False
 			if event.type == self.game.events['SPAWN']:
 				
-				if elapsed >= 50:
-					self.game.obsManager.spawn_obstacle(5, self.game.events['SPAWN'], self.game.spawn_timer)
-				elif elapsed >= 30:
-					self.game.obsManager.spawn_obstacle(4, self.game.events['SPAWN'], self.game.spawn_timer)
-				else:
+				if elapsed >= 30:
 					self.game.obsManager.spawn_obstacle(3, self.game.events['SPAWN'], self.game.spawn_timer)
+				else:
+					self.game.obsManager.spawn_obstacle(2, self.game.events['SPAWN'], self.game.spawn_timer)
 
 		keys_pressed = pygame.key.get_pressed()
 		if keys_pressed[pygame.K_a]:

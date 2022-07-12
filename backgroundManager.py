@@ -10,7 +10,7 @@ class BackgroundManager():
 		self.left_img = pygame.transform.scale(pygame.image.load('Assets\\Background\\pool_side.png').convert_alpha(), (16,64))
 		self.right_img = pygame.transform.flip(self.left_img, True, False)
 		self.left_shore = [ShorePiece(self.left_img, 0, 0)]
-		self.right_shore = [ShorePiece(self.left_img, self.game.WIDTH-32, 0)]
+		self.right_shore = [ShorePiece(self.left_img, self.game.WIDTH-16, 0)]
 		self.water_effects = []
 
 
@@ -18,8 +18,10 @@ class BackgroundManager():
 
 		#self.make_water_effect()
 		for effect in self.water_effects:
+			effect.update()
 			if effect.reached_end():
 				self.water_effects.remove(effect)
+
 
 		for thing in self.left_shore + self.right_shore:
 			thing.update()
@@ -37,6 +39,9 @@ class BackgroundManager():
 		for thing in self.left_shore + self.right_shore:
 			thing.render(surface)
 
+		for thing in self.water_effects:
+			thing.render(surface)
+
 		
 
 
@@ -47,10 +52,9 @@ class BackgroundManager():
 		#for x in range(5):
 			#self.left_shore.append()
 
-	"""def make_water_effect(self):
-		for x in range(0,3):
-			coord = random.randint(5,750)
-			self.water_effects.append(WaterBoy(coord, self.game.HEIGHT))"""
+	def make_water_effect(self):
+		coord = random.randint(5,750)
+		self.water_effects.append(WaterBoy(coord, self.game.HEIGHT))
 
 
 
@@ -68,20 +72,19 @@ class ShorePiece():
 
 	def update(self):
 		self.img_rect.y += ShorePiece.vel
-"""
+
 class WaterBoy():
 
 	def __init__(self, x, y):
-		self.vel = 0
-		self.img = self.get_type()
-		self.rect = self.img.get_rect()
-		self.rect.x, self.rect.y = x,y
+		self.x = x
+		self.y = y
+		self.get_type()
 
 	def update(self):
-		self.rect.y += self.vel
+		self.y += self.vel * 2
 
 	def render(self, surface):
-		surface.blit(self.img, self.rect)
+		pygame.draw.rect(surface, self.color, pygame.Rect(self.x, self.y, self.width, self.height))
 
 
 	def get_type(self):
@@ -89,24 +92,22 @@ class WaterBoy():
 		t = random.randint(0,2)
 		match t:
 			case 0:
-				surf = pygame.Surface((6, 20))
-				surf.fill((0,153,219))
-				self.vel = -8
-			case 1:
-				surf = pygame.Surface((4, 20))
-				surf.fill((44,232,245))
-				self.vel = -12
-			case 2:
-				print('bippy')
-				surf = pygame.Surface((1000, 20))
-				surf.fill((255,255,255))
+				self.color = (0,153,219)
 				self.vel = -1
-		return surf
+			case 1:
+				self.color = (44,232,245)
+				self.vel = -2
+			case 2:
+				self.color = (255,255,255)
+				self.vel = -3
+		self.width = (t+1)
+		self.height = 10*(t+1)
+
 
 	def reached_end(self):
 
-		if self.rect.y+self.rect.height <= 0:
+		if self.y+self.height <= 0:
 			return True
 		else:
 			return False 
-"""
+

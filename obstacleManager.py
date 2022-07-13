@@ -23,26 +23,26 @@ class ObstacleManager:
 		self.snorkle_stomped = pygame.image.load('Assets\\Snorkler\\snorkle_stomped_sprites.png').convert_alpha()
 		self.snorkle_activated = pygame.image.load('Assets\\Snorkler\\snorkle_activated_sprites.png').convert_alpha()
 		self.snorkle_swim = pygame.image.load('Assets\\Snorkler\\snorkle_swimming_sprites.png').convert_alpha()
-		self.snorkle_sheets = {'SWIMMING':self.snorkle_swim, 'ACTIVATED':self.snorkle_activated, 'STOMPED':self.snorkle_activated}
+		self.snorkle_sheets = {'SWIMMING':self.snorkle_swim, 'ACTIVATED':self.snorkle_activated, 'STOMPED':self.snorkle_stomped}
 		self.coin_idle = pygame.image.load('Assets\\Coin\\coin_idle_sprites.png').convert_alpha()
 	
-	def update(self, surface):
+	def update(self, surface, delta):
 
 		for obstacle in self.obstacle_list:
 			obstacle.frame += 1
-			obstacle.update()
+			obstacle.update(delta)
 			if obstacle.get_end_screen() or obstacle.state == 'DEAD':
 				self.obstacle_list.remove(obstacle)
 
 		for coin in self.coin_list:
 			coin.frame += 1
-			coin.update()
+			coin.update(delta)
 			if coin.get_end_screen():
 				self.coin_list.remove(coin)
 
 		for snorkle in self.snorkle_list:
 			snorkle.frame += 1
-			snorkle.update()
+			snorkle.update(delta)
 
 			if snorkle.get_end_screen():
 				self.snorkle_list.remove(snorkle)
@@ -98,8 +98,7 @@ class ObstacleManager:
 
 			if works:
 				self.spawn_list.append(thing)
-				print(thing.type)
-			#print("WORK")
+				
 		for guy in self.spawn_list:
 			if guy.type == 'Obstacle':
 				self.obstacle_list.append(guy)

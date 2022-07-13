@@ -8,7 +8,7 @@ class State():
 
 	def __init__(self, game):
 		self.game = game
-	def update(self, events):
+	def update(self, events, delta):
 		pass
 
 	def render(self, surface):
@@ -29,7 +29,7 @@ class TitleState(State):
 		self.title_img = pygame.image.load('Assets/temp_title_screen.png').convert_alpha()
 		self.title_rect = self.title_img.get_rect()
 
-	def update(self, events):
+	def update(self, events, delta):
 
 		for event in events:
 			if event.type == pygame.QUIT:
@@ -65,7 +65,7 @@ class SwimState(State):
 		self.run_time = pygame.time.get_ticks()
 		#self.game_image = pyg
 
-	def update(self, events):
+	def update(self, events, delta):
 
 		elapsed = (pygame.time.get_ticks()-self.run_time)/1000
 
@@ -95,9 +95,9 @@ class SwimState(State):
 			new_state = PauseState(self.game)
 			new_state.enter_state()
 
-		self.game.backgroundManager.update()
-		self.game.obsManager.update(self.game.game_canvas)
-		self.game.player.update(self.game.game_canvas,self.game.obsManager.get_obstacles(), self.game.obsManager.get_coins(), self.game.obsManager.get_snorkle())
+		self.game.backgroundManager.update(delta)
+		self.game.obsManager.update(self.game.game_canvas, delta)
+		self.game.player.update(self.game.game_canvas,self.game.obsManager.get_obstacles(), self.game.obsManager.get_coins(), self.game.obsManager.get_snorkle(), delta)
 		
 		if self.game.player.hp <= 0:
 			self.transition_state('DEAD')
@@ -158,7 +158,7 @@ class PauseState(State):
 		self.buttons[1].rect.x = 50
 		self.buttons[1].rect.y = self.game.HEIGHT-300
 
-	def update(self, events):
+	def update(self, events , delta):
 
 		for event in events:
 			if event.type == pygame.QUIT:
@@ -215,7 +215,7 @@ class ShopState(State):
 		self.player_money_render = ShopState.SHOP_FONT.render(str(self.game.player_stats['money']), True, (0,0,0))
 		self.player_money_rect = self.player_money_render.get_rect()
 
-	def update(self, events):
+	def update(self, events , delta):
 		for event in events:
 			if event.type == pygame.QUIT:
 				self.game.playing = False

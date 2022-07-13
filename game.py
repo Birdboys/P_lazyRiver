@@ -38,8 +38,8 @@ class Game:
 		self.events = {'SPAWN':Game.SPAWN_OBSTACLE}
 		self.spawn_buffer = 0
 
-	def update(self, events):
-		self.state_stack[-1].update(events)
+	def update(self, events, delta):
+		self.state_stack[-1].update(events, delta)
 
 	def render(self, events):
 		self.state_stack[-1].render(self.game_canvas)
@@ -47,9 +47,9 @@ class Game:
 		pygame.display.update()
 
 	def game_loop(self):
-		Game.clock.tick(Game.FPS)
+		delta = Game.clock.tick(Game.FPS)/1000
 		events = pygame.event.get()
-		self.update(events)
+		self.update(events, delta)
 		self.render(self.WIN)
 
 	def increasePlayerSpeed(self):

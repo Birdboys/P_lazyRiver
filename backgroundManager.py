@@ -14,17 +14,17 @@ class BackgroundManager():
 		self.water_effects = []
 
 
-	def update(self):
+	def update(self, delta):
 
 		self.make_water_effect()
 		for effect in self.water_effects:
-			effect.update()
+			effect.update(delta)
 			if effect.reached_end():
 				self.water_effects.remove(effect)
 
 
 		for thing in self.left_shore + self.right_shore:
-			thing.update()
+			thing.update(delta)
 
 		left_boy = self.left_shore[-1]
 		if left_boy.img_rect.y + left_boy.img_rect.height < self.game.HEIGHT:
@@ -70,8 +70,8 @@ class ShorePiece():
 	def render(self, surface):
 		surface.blit(self.img, self.img_rect)
 
-	def update(self):
-		self.img_rect.y += ShorePiece.vel
+	def update(self, delta):
+		self.img_rect.y += ShorePiece.vel * delta * 60
 
 class WaterBoy():
 
@@ -80,8 +80,8 @@ class WaterBoy():
 		self.y = y
 		self.get_type()
 
-	def update(self):
-		self.y += self.vel * 2
+	def update(self, delta):
+		self.y += self.vel * 2 * delta * 60
 
 	def render(self, surface):
 		pygame.draw.rect(surface, self.color, pygame.Rect(self.x, self.y, self.width, self.height))

@@ -20,12 +20,12 @@ class Obstacle:
 	"""def render(self, screen):
 		screen.blit(self.img, self.rect)"""
 
-	def update(self):
+	def update(self, delta):
 
 		match self.state:
 			case 'SWIMMING':
-				self.rect.x += self.vel_x
-				self.rect.y += self.vel_y
+				self.rect.x += self.vel_x * delta * 60
+				self.rect.y += self.vel_y * delta * 60
 				self.frame = 0
 
 			case 'HIT':
@@ -36,8 +36,8 @@ class Obstacle:
 
 			case 'BOUNCED':
 				self.frame = self.frame % (4 * 4)
-				self.rect.x += int(self.vel_x * 0.75)
-				self.rect.y += int(self.vel_y * 0.75)
+				self.rect.x += int(self.vel_x * 0.75) * delta * 60
+				self.rect.y += int(self.vel_y * 0.75) * delta * 60
 
 				if pygame.time.get_ticks()-self.bounced_timer > 5000:
 					self.state = 'SWIMMING'
@@ -113,10 +113,10 @@ class Coin(Obstacle):
 		self.frame = random.randint(0,40)
 		self.val = self.get_val()
 
-	def update(self):
+	def update(self, delta):
 		self.frame = self.frame % (10*4)
-		self.rect.x += self.vel_x
-		self.rect.y += self.vel_y
+		self.rect.x += self.vel_x * delta * 60
+		self.rect.y += self.vel_y * delta * 60
 
 	def get_end_screen(self):
 
@@ -147,11 +147,11 @@ class Snorkle(Obstacle):
 		self.type = 'Snorkle'
 		self.frame = 0
 
-	def update(self):
+	def update(self, delta):
 
 		if self.state == 'SWIMMING':
-			self.rect.x += self.vel_x
-			self.rect.y += self.vel_y
+			self.rect.x += self.vel_x * delta * 60
+			self.rect.y += self.vel_y * delta * 60
 			self.frame = self.frame % (7 * 4)
 
 		if self.state == 'ACTIVATED':
@@ -161,8 +161,8 @@ class Snorkle(Obstacle):
 
 
 		if self.state == 'STOMPED':
-			self.frame = self.frame % (6 * 4)
-			if (pygame.time.get_ticks()-self.activate_timer)/1000 >= 1:
+			self.frame = self.frame % (6 * 8)
+			if (pygame.time.get_ticks()-self.activate_timer)/1000 >= 5:
 				self.state = 'GONE'
 				self.used = True
 
@@ -187,4 +187,5 @@ class Snorkle(Obstacle):
 
 	def stomp(self):
 		self.state = 'STOMPED'
+		self.frame = 0
 

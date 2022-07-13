@@ -32,30 +32,38 @@ class Player:
 		self.frame = 0
 		self.bounce_part_list = []
 		self.coin_part_list = []
+		self.invincible_time = 0
 		
 
-	def update(self,screen, obstacles, coins, snorklers):
+	def update(self,screen, obstacles, coins, snorklers, delt):
 
 		if self.state == 'SWIMMING':
 			self.descelerate()
-			self.rect.x += self.vel_x
-			self.rect.y += self.vel_y
+			self.rect.x += self.vel_x * delt * 60
+			self.rect.y += self.vel_y * delt * 60
 			#self.generate_swim_parts()
 			self.coin_hit_check(coins)
 			self.state = self.obstacle_hit_check(obstacles)
 			self.snorkle_hit_check(snorklers)
 			self.border_check()	
+			if self.invincible_time:
+				self.invincible_time += delt
+				if self.invincible_time > 0.5:
+					self.invincible_time = 0
+
+
 			 
 
 		if self.state == 'HIT':
 			
 			self.descelerate()
-			self.rect.x += self.vel_x//2
-			self.rect.y += self.vel_y//2
+			self.rect.x += self.vel_x//2 * delt * 60
+			self.rect.y += self.vel_y//2 * delt * 60
 			self.border_check()
 			if (pygame.time.get_ticks()-self.hit_timer)/1000 >= 1:
 				self.state = 'SWIMMING'
 				self.hit_timer = 0
+				self.invincible_time = delt
 
 
 		if self.state == 'BOUNCE':
@@ -63,8 +71,8 @@ class Player:
 				temp = self.vel_y
 				self.vel_y = temp * np.sin(45)
 				self.vel_x = temp * np.sin(45)
-			self.rect.x += self.vel_x
-			self.rect.y += self.vel_y
+			self.rect.x += self.vel_x * delt * 60
+			self.rect.y += self.vel_y * delt * 60
 			self.border_check()
 
 			#GET SCALE
@@ -81,7 +89,6 @@ class Player:
 					self.state = 'HIT'
 					self.hit_timer = pygame.time.get_ticks()
 				else:
-					
 					self.state = 'SWIMMING'
 			elif delta >= self.bounce_time-self.bounce_time/10:
 				self.coin_hit_check(coins)
@@ -220,7 +227,7 @@ class Player:
 	def obstacle_hit_check(self, obstacles):
 		hit = False
 		for obstacle in obstacles:
-			if pygame.Rect.colliderect(self.rect, obstacle.rect) and not obstacle.state == 'HIT' and self.get_distance(obstacle) < 75:
+			if pygame.Rect.colliderect(self.rect, obstacle.rect) and not obstacle.state == 'HIT' and self.get_distance(obstacle) < 75 and not self.invincible_time:
 				self.hit()
 				obstacle.hit()
 				hit = True
@@ -332,17 +339,3 @@ class Player:
 			part_center = (self.rect.x + self.rect.width/2 + random.randint(-50,50),self.rect.y + 3 *self.rect.height/4 + random.randint(-10,10))
 			self.coin_part_list.append(Particle(part_center[0],part_center[1], 0, random.randint(-3,-1), color, random.randint(4,6)))
 			
-		print(len(self.coin_part_list))
-
-
-
-
-
-
-				
-
-
-
-
-				
-

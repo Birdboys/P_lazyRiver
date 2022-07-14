@@ -29,7 +29,7 @@ class Game:
 		self.obsManager = ObstacleManager(self.game_canvas, self.WIDTH, self.HEIGHT)
 		self.backgroundManager = BackgroundManager(self)
 
-		self.player_stats = {'hp':3,'money':20,'max_vel_x':4, 'max_vel_y':3,'noodle_upgrade':0, 'speedo_upgrade':0}
+		self.player_stats = {'hp':2,'money':0,'max_vel_x':4, 'max_vel_y':3,'noodle_upgrade':0, 'speedo_upgrade':0}
 		self.playing = True
 		self.running = True
 		self.state_stack = [TitleState(self)]

@@ -53,8 +53,9 @@ class BackgroundManager():
 			#self.left_shore.append()
 
 	def make_water_effect(self):
-		coord = random.randint(5,750)
-		self.water_effects.append(WaterBoy(coord, self.game.HEIGHT))
+		if random.uniform(0,1) < 0.3:
+			coord = random.randint(10,390)
+			self.water_effects.append(WaterBoy(coord, self.game.HEIGHT))
 
 
 

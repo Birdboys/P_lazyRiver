@@ -60,9 +60,13 @@ class SwimState(State):
 		self.money_render = SwimState.HP_FONT.render(str(self.game.player_stats['money']), True, (0,0,0))
 		self.money_rect = self.money_render.get_rect()
 
-		self.initUI()
+		
 
+
+		self.hp_render_img = pygame.image.load('Assets\\UI\\player_hp_sprites.png').convert_alpha()
+		self.hp_render_rect = self.hp_render_img.get_rect()
 		self.run_time = pygame.time.get_ticks()
+		self.initUI()
 		#self.game_image = pyg
 
 	def update(self, events, delta):
@@ -120,6 +124,7 @@ class SwimState(State):
 		self.game.player.render(surface)
 		surface.blit(self.hp_render, self.hp_rect)
 		surface.blit(self.money_render,self.money_rect)
+		self.renderHPBar(surface)
 
 	def reset_play_space(self):
 		self.game.player.reset_counters()
@@ -136,6 +141,18 @@ class SwimState(State):
 
 	def initUI(self):
 		self.money_rect.y = 32
+		self.hp_render_rect.x = 16
+		self.hp_render_rect.y = 5
+
+
+	def renderHPBar(self, surface):
+		temp = pygame.Surface((5*128,128 )).convert_alpha()
+		temp.blit(self.hp_render_img, (0,0), (0,0, 128 * self.game.player.get_hp(), 128))
+		temp = pygame.transform.scale(temp, (48 * 5, 48))
+		temp.set_colorkey((0,0,0))
+		surface.blit(temp, self.hp_render_rect)
+
+
 
 class PauseState(State):
 
@@ -298,7 +315,7 @@ class ShopState(State):
 
 	def hpUpgrade(self):
 		hp_img = pygame.image.load('Assets/temp_heart_icon.png').convert_alpha()
-		boy = ShopItem(hp_img, self.game.player_stats['hp']-1, 4, [5,10,15,20])
+		boy = ShopItem(hp_img, self.game.player_stats['hp']-2, 3, [10,15,20])
 		boy.img_rect.x, boy.img_rect.y = self.game.WIDTH-50-boy.ITEM_WIDTH,50
 		return boy
 

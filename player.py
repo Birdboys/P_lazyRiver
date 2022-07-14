@@ -99,8 +99,7 @@ class Player:
 
 			self.vel_x = 0
 			self.vel_y = 0
-		if self.bounce_part_list or self.coin_part_list:
-			self.update_parts()
+		self.update_parts()
 		
 		self.border_check()	
 
@@ -304,15 +303,16 @@ class Player:
 		return surf
 
 	def update_parts(self):
-		for part in self.bounce_part_list:
-			part.update()
-			if part.radius <= 0:
-				self.bounce_part_list.remove(part)
-
-		for part in self.coin_part_list:
-			part.update()
-			if part.radius <= 0:
-				self.coin_part_list.remove(part)
+		if self.bounce_part_list:
+			for part in self.bounce_part_list:
+				part.update()
+				if part.radius <= 0:
+					self.bounce_part_list.remove(part)
+		if self.coin_part_list:
+			for part in self.coin_part_list:
+				part.update()
+				if part.radius <= 0:
+					self.coin_part_list.remove(part)
 
 	def render_bounce_parts(self, surface):
 		for part in self.bounce_part_list:
@@ -325,7 +325,7 @@ class Player:
 		part_center = (self.rect.x + self.rect.width/2,self.rect.y + self.rect.height/4)
 
 		for x in range(0,40):
-			self.bounce_part_list.append(Particle(part_center[0],part_center[1], random.randint(0,20)/10-1, random.randint(0,20)/10-1, (255,255,255),-.2))
+			self.bounce_part_list.append(Particle(part_center[0],part_center[1], random.randint(0,20)/10-1, random.randint(0,20)/10-1, (255,255,255), 8, -.2))
 
 	def generate_swim_parts(self):
 

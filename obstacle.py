@@ -30,7 +30,8 @@ class Obstacle:
 
 			case 'HIT':
 				self.frame = self.frame % (8 * 4)
-
+				self.rect.x += self.vel_x * delta * 60 // 5
+				self.rect.y += self.vel_y * delta * 60 // 5
 				if pygame.time.get_ticks()-self.hit_timer > 1000:
 					self.state = 'DEAD'
 
@@ -126,7 +127,7 @@ class Coin(Obstacle):
 			return False
 
 	def get_val(self):
-		if random.uniform(0,1) <= 0.1:
+		if random.uniform(0,1) <= 1:
 			return 5
 		else:
 			return 1

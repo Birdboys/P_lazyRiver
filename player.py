@@ -35,14 +35,14 @@ class Player:
 		self.invincible_time = 0
 		
 
-	def update(self,screen, obstacles, coins, snorklers, delt):
+	def update(self,screen, obstacles, coins, snorklers, delt, mult):
 
 		if self.state == 'SWIMMING':
 			self.descelerate()
 			self.rect.x += self.vel_x * delt * 60
 			self.rect.y += self.vel_y * delt * 60
 			#self.generate_swim_parts()
-			self.coin_hit_check(coins)
+			self.coin_hit_check(coins, mult)
 			self.state = self.obstacle_hit_check(obstacles)
 			self.snorkle_hit_check(snorklers)
 			self.border_check()	
@@ -91,7 +91,7 @@ class Player:
 				else:
 					self.state = 'SWIMMING'
 			elif delta >= self.bounce_time-self.bounce_time/10:
-				self.coin_hit_check(coins)
+				self.coin_hit_check(coins, mult)
 				if self.check_rebound(obstacles):
 					self.generate_land_parts()
 					self.bounce_timer = pygame.time.get_ticks()
@@ -184,6 +184,7 @@ class Player:
 						self.vel_y = self.stats['max_back_vel_y']
 				elif self.state == 'BOUNCE':
 					self.vel_y = -self.stats_bounce['max_vel_y']
+
 	def descelerate(self):
 
 		if self.vel_x != 0:
@@ -207,7 +208,7 @@ class Player:
 			self.rect.y = 0
 			self.vel_y = 0
 		if self.rect.y + Player.PLAYER_HEIGHT > self.GAME_HEIGHT:
-			self.y = self.GAME_HEIGHT - Player.PLAYER_HEIGHT
+			self.rect.y = self.GAME_HEIGHT - Player.PLAYER_HEIGHT
 		if self.rect.x - 10 < 0:
 			self.rect.x = 10
 		if self.rect.x + Player.PLAYER_WIDTH + 10> self.GAME_WIDTH:
@@ -239,10 +240,10 @@ class Player:
 			return 'SWIMMING'
 
 
-	def coin_hit_check(self, coins):
+	def coin_hit_check(self, coins, mult):
 		for coin in coins:
 			if pygame.Rect.colliderect(self.rect, coin.rect):
-				self.money += coin.val
+				self.money += coin.val * mult
 				if coin.val > 1:
 					self.generate_coin_parts((99,199,77))
 				else:

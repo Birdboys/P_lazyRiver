@@ -29,7 +29,7 @@ class Game:
 		self.obsManager = ObstacleManager(self.game_canvas, self.WIDTH, self.HEIGHT)
 		self.backgroundManager = BackgroundManager(self)
 
-		self.player_stats = {'hp':2,'money':0,'max_vel_x':4, 'max_vel_y':3,'noodle_upgrade':0, 'speedo_upgrade':0}
+		self.player_stats = {'hp':1,'money':0,'max_vel_x':4, 'max_vel_y':3,'money_mult':0, 'speedo_upgrade':0}
 		self.playing = True
 		self.running = True
 		self.state_stack = [TitleState(self)]
@@ -60,8 +60,8 @@ class Game:
 	def increasePlayerHP(self):
 		self.player_stats['hp'] = self.player_stats['hp'] + 1
 
-	def noodleObtained(self):
-		self.player_stats['noodle_upgrade'] = 1 
+	def increasePlayerMoneyMult(self):
+		self.player_stats['money_mult'] = self.player_stats['money_mult'] + 1
 
 	def speedoObtained(self):
 		self.player_stats['speedo_upgrade'] = 1

@@ -5,12 +5,14 @@ from particle import Particle
 import random 
 class Player:
 
+	pygame.mixer.init()
 	ACCELERATION_X = 1
 	ACCELERATION_Y = 1.5
 	DESCELERATION_Y = -1
 	DESCELERATION_X = 0.3
 	PLAYER_WIDTH, PLAYER_HEIGHT = 100, 100
-
+	DUCK_QUACKS = [pygame.mixer.Sound('Assets\\Sounds\\duck_pickup_1.wav'), pygame.mixer.Sound('Assets\\Sounds\\duck_pickup_2.wav')]
+	pygame.mixer.init()
 	def __init__(self, WIDTH, HEIGHT):
 		self.GAME_WIDTH = WIDTH
 		self.GAME_HEIGHT = HEIGHT
@@ -230,6 +232,8 @@ class Player:
 			if pygame.Rect.colliderect(self.rect, obstacle.rect) and not obstacle.state == 'HIT' and self.get_distance(obstacle) < 75 and not self.invincible_time:
 				self.hit()
 				obstacle.hit()
+				obstacle.vel_x = self.vel_x // 3
+				obstacle.vel_y = self.vel_y // 3
 				hit = True
 		if hit:
 			self.hit_timer = pygame.time.get_ticks()
@@ -249,6 +253,7 @@ class Player:
 				else:
 					self.generate_coin_parts((254,172,54))
 				coins.remove(coin)
+				np.random.choice(Player.DUCK_QUACKS).play()
 
 	def snorkle_hit_check(self, snorkles):
 		for snorkle in snorkles:

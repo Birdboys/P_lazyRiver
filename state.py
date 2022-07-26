@@ -28,6 +28,9 @@ class TitleState(State):
 		self.game = game
 		self.title_img = pygame.image.load('Assets/temp_title_screen.png').convert_alpha()
 		self.title_rect = self.title_img.get_rect()
+		self.img = pygame.transform.scale(pygame.image.load('test.png').convert_alpha(), (300,300))
+		self.img.set_colorkey((0,0,0))
+		self.img_rect = self.img.get_rect()
 
 	def update(self, events, delta):
 
@@ -43,6 +46,7 @@ class TitleState(State):
 
 	def render(self, surface):
 		surface.blit(self.title_img, (0,0))
+		surface.blit(self.img, self.img_rect)
 
 class SwimState(State):
 
@@ -54,13 +58,24 @@ class SwimState(State):
 		self.game.player.hp = self.game.player_stats['hp']
 		pygame.time.set_timer(self.game.events['SPAWN'], self.game.spawn_timer, 1)
 
-		self.hp_render_img = pygame.image.load('Assets\\UI\\player_hp_sprites.png').convert_alpha()
+		self.hp_render_img = pygame.transform.scale(pygame.image.load('Assets\\UI\\player_hp_sprites.png').convert_alpha(), (48,48))
 		self.hp_render_rect = self.hp_render_img.get_rect()
+		self.hp_render_text = SwimState.MONEY_FONT.render(str(self.game.player_stats['hp']), True, (0,0,0))
+		self.hp_render_text_rect = self.hp_render_text.get_rect()
+		
 		self.money_render_img = pygame.transform.scale(pygame.image.load('Assets\\UI\\player_money_sprites.png').convert_alpha(), (48,48))
 		self.money_render_rect = self.money_render_img.get_rect()
 		self.money_render_text = SwimState.MONEY_FONT.render(str(self.game.player_stats['money']), True, (0,0,0))
 		self.money_render_text_rect = self.money_render_text.get_rect()
 		self.run_time = pygame.time.get_ticks()
+		
+		self.prog_background = pygame.Rect(100, 10, 200, 35)
+		self.prog_player = pygame.Rect(self.prog_background.x + 10, self.prog_background.y + 5, 180, 25)
+		self.prog_enemy_img = pygame.transform.scale(pygame.image.load('Assets\\UI\\enemy_progress_runner.png').convert_alpha(), (48*4,48))
+		self.prog_enemy_frame = 0
+
+		self.speed_conv = {4: 0.75, 5: 0.85, 6: 0.95, 7: 1.05, 8: 1.15, 9: 1.25}
+
 		self.initUI()
 
 		self.goin = False
@@ -103,29 +118,33 @@ class SwimState(State):
 		if self.game.player.hp <= 0:
 			self.transition_state('DEAD')
 
+		self.hp_render_text = SwimState.MONEY_FONT.render(str(self.game.player.get_hp()), True, (0,0,0))
+		self.hp_render_text_rect = self.hp_render_text.get_rect()
+
 		self.money_render_text = SwimState.MONEY_FONT.render(str(self.game.player.get_money()), True, (0,0,0))
 		self.money_render_text_rect = self.money_render_text.get_rect()
 		
 
-		"""if elapsed >= 60:
+		if elapsed >= 60:
 			print("TIME END")
 			self.game.playing = False
 			self.game.state_stack.pop()
 			new_state = ShopState(self.game)
-			new_state.enter_state()"""
+			new_state.enter_state()
 
 
 	def render(self, surface):
-		if not self.goin:
-			new_state = CountdownState(self.game)
-			new_state.enter_state()
-			self.goin = True
+		#if not self.goin:
+			#new_state = CountdownState(self.game)
+			#new_state.enter_state()
+			#self.goin = True
 		surface.fill((0,153,153))
 		self.game.backgroundManager.render(surface)
 		self.game.obsManager.render(surface)
 		self.game.player.render(surface)
 		self.renderHPBar(surface)
 		self.renderMoneyCounter(surface)
+		self.renderProgress(surface)
 
 	def reset_play_space(self):
 		self.game.player.reset_counters()
@@ -142,7 +161,9 @@ class SwimState(State):
 
 	def initUI(self):
 		self.hp_render_rect.x = 20
+		self.hp_render_text_rect.x = 40
 		self.hp_render_rect.y = 4
+		self.hp_render_text_rect.y = 6
 
 		self.money_render_rect.x = self.game.WIDTH - self.money_render_rect.width - 20 - self.money_render_text_rect.width
 		self.money_render_rect.y = 0
@@ -150,11 +171,10 @@ class SwimState(State):
 		self.money_render_text_rect.y = 6
 
 	def renderHPBar(self, surface):
-		temp = pygame.Surface((5*128,128 )).convert_alpha()
-		temp.blit(self.hp_render_img, (0,0), (0,0, 128 * self.game.player.get_hp(), 128))
-		temp = pygame.transform.scale(temp, (48 * 5, 48))
-		temp.set_colorkey((0,0,0))
-		surface.blit(temp, self.hp_render_rect)
+		self.hp_render_rect.x = 20
+		self.hp_render_text_rect.x = 20 + self.hp_render_rect.width
+		surface.blit(self.hp_render_img, self.hp_render_rect)
+		surface.blit(self.hp_render_text, self.hp_render_text_rect)
 
 	def renderMoneyCounter(self, surface):
 		self.money_render_rect.x = self.game.WIDTH - self.money_render_rect.width - 20 - self.money_render_text_rect.width
@@ -162,7 +182,17 @@ class SwimState(State):
 		surface.blit(self.money_render_img, self.money_render_rect)
 		surface.blit(self.money_render_text, self.money_render_text_rect)
 
+	def renderProgress(self, surface):
+		pygame.draw.rect(surface, (139,155,180), self.prog_background)
+		
+		self.prog_player.width = 180 * (pygame.time.get_ticks() - self.run_time)//60000 * self.speed_conv[self.game.player_stats['max_vel_x']]
+		pygame.draw.rect(surface, (254,172,52), self.prog_player)
 
+		self.prog_enemy_frame = (self.prog_enemy_frame + 1) % 31
+		temp = (self.prog_background.width - 20) * (pygame.time.get_ticks() - self.run_time)//60000
+		val = self.prog_enemy_img.get_width()//4
+		surface.blit(self.prog_enemy_img, (self.prog_background.x+temp - 24 + 10, 20), (self.prog_enemy_frame//8 * val, 0, val, self.prog_enemy_img.get_height()))
+	
 
 class PauseState(State):
 

@@ -30,8 +30,8 @@ class Obstacle:
 
 			case 'HIT':
 				self.frame = self.frame % (8 * 4)
-				self.rect.x += self.vel_x * delta * 60 // 5
-				self.rect.y += self.vel_y * delta * 60 // 5
+				self.rect.x += self.vel_x * delta * 60 
+				self.rect.y += self.vel_y * delta * 60
 				if pygame.time.get_ticks()-self.hit_timer > 1000:
 					self.state = 'DEAD'
 
@@ -46,6 +46,7 @@ class Obstacle:
 
 			case _:
 				pass
+		self.edge_check()
 
 	def get_end_screen(self):
 
@@ -73,6 +74,14 @@ class Obstacle:
 		else:
 			self.state = 'BOUNCED'
 			self.bounced_timer = pygame.time.get_ticks()
+
+	def edge_check(self):
+		if self.rect.x < 0 + 10:
+			self.vel_x = -self.vel_x
+			self.rect.x = 10
+		elif self.rect.x + self.rect.width > 400 - 10:
+			self.vel_x = -self.vel_x
+			self.rect.x = 400 - 10 - self.rect.width
 
 
 class Noodle(Obstacle):

@@ -21,6 +21,7 @@ class Game:
 
 	def __init__(self):
 		pygame.init()
+		pygame.mixer.init()
 		self.WIDTH, self.HEIGHT = 400, 800
 		self.WIN = pygame.display.set_mode((self.WIDTH,self.HEIGHT))
 		self.game_canvas = pygame.Surface((self.WIDTH, self.HEIGHT))
@@ -29,7 +30,7 @@ class Game:
 		self.obsManager = ObstacleManager(self.game_canvas, self.WIDTH, self.HEIGHT)
 		self.backgroundManager = BackgroundManager(self)
 
-		self.player_stats = {'hp':1,'money':0,'max_vel_x':4, 'max_vel_y':3,'money_mult':0, 'speedo_upgrade':0}
+		self.player_stats = {'hp':2,'money':0,'max_vel_x':4, 'max_vel_y':3,'money_mult':0, 'speedo_upgrade':0}
 		self.playing = True
 		self.running = True
 		self.state_stack = [TitleState(self)]

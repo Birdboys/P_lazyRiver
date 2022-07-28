@@ -12,7 +12,7 @@ class Obstacle:
 		self.vel_x = 0
 		self.vel_y = -4 + random.randint(-1,1)
 		self.state = 'SWIMMING'
-		self.preset = random.randint(0,1)
+		self.preset = random.randint(0,2)
 		self.frame = 0
 		self.hit_timer = 0
 		self.bounced_timer = 0
@@ -29,7 +29,10 @@ class Obstacle:
 				self.frame = 0
 
 			case 'HIT':
-				self.frame = self.frame % (8 * 4)
+				if self.preset == 2:
+					self.frame = self.frame % (4 * 4)
+				else:
+					self.frame = self.frame % (8 * 4)
 				self.rect.x += self.vel_x * delta * 60 
 				self.rect.y += self.vel_y * delta * 60
 				if pygame.time.get_ticks()-self.hit_timer > 1000:
@@ -67,10 +70,8 @@ class Obstacle:
 
 	def bouncy(self):
 		if self.state == 'BOUNCED':
-			#print("OH FUCK OWY")
 			self.state = 'HIT'
 			self.hit_timer = pygame.time.get_ticks()
-			#print(self.state)
 		else:
 			self.state = 'BOUNCED'
 			self.bounced_timer = pygame.time.get_ticks()

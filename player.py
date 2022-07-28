@@ -12,6 +12,7 @@ class Player:
 	DESCELERATION_X = 0.3
 	PLAYER_WIDTH, PLAYER_HEIGHT = 100, 100
 	DUCK_QUACKS = [pygame.mixer.Sound('Assets\\Sounds\\duck_pickup_1.wav'), pygame.mixer.Sound('Assets\\Sounds\\duck_pickup_2.wav')]
+	WHISTLE_BLOW = [pygame.mixer.Sound('Assets\\Sounds\\whistle1.wav'), pygame.mixer.Sound('Assets\\Sounds\\whistle2.wav'), pygame.mixer.Sound('Assets\\Sounds\\whistle3.wav')]
 	pygame.mixer.init()
 	def __init__(self, WIDTH, HEIGHT):
 		self.GAME_WIDTH = WIDTH
@@ -35,6 +36,7 @@ class Player:
 		self.bounce_part_list = []
 		self.coin_part_list = []
 		self.invincible_time = 0
+		self.dooby = (0,0)
 		
 
 	def update(self,screen, obstacles, coins, snorklers, delt, mult):
@@ -107,7 +109,7 @@ class Player:
 
 	def render(self, screen):
 
-		val = 1
+		val = 3
 		scale = 1
 		match self.state:
 			case 'SWIMMING':
@@ -115,6 +117,9 @@ class Player:
 					val = 0
 				elif self.vel_x > 0:
 					val = 2
+				elif self.vel_y > 0:
+					val = 1
+
 
 			case 'BOUNCE':
 				delta = (pygame.time.get_ticks()-self.bounce_timer)
@@ -138,7 +143,7 @@ class Player:
 		if self.bounce_part_list:
 			self.render_bounce_parts(screen)
 		image = self.get_sprite(self.images[self.state], 128, 128, (128 * val, 0),(128 * (val + 1), 128), scale)
-
+		self.dooby = (image.get_width(), image.get_height())
 		screen.blit(image, self.rect)
 		if self.coin_part_list:
 			self.render_coin_parts(screen)
@@ -225,6 +230,8 @@ class Player:
 
 	def hit(self):
 		self.hp -= 1
+		if self.hp != 0:
+			Player.WHISTLE_BLOW[random.randint(0,len(Player.WHISTLE_BLOW)-1)].play()
 
 	def obstacle_hit_check(self, obstacles):
 		hit = False
@@ -253,7 +260,7 @@ class Player:
 				else:
 					self.generate_coin_parts((254,172,54))
 				coins.remove(coin)
-				np.random.choice(Player.DUCK_QUACKS).play()
+				Player.DUCK_QUACKS[random.randint(0,len(Player.DUCK_QUACKS)-1)].play()
 
 	def snorkle_hit_check(self, snorkles):
 		for snorkle in snorkles:
@@ -275,6 +282,8 @@ class Player:
 		for obstacle in obstacles:
 			if pygame.Rect.colliderect(self.rect, obstacle.rect)  and self.get_distance(obstacle) < 60:
 					if obstacle.state == 'BOUNCED':
+						self.hit()
+					if obstacle.preset == 2:
 						self.hit()
 					rebound = True
 					obstacle.bouncy()

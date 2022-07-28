@@ -16,10 +16,17 @@ class ObstacleManager:
 		self.hit = False
 		self.spawn_list = []
 		self.spawn_prob = [0.6, 0.4]#[0.4, 0.3, 0.3]
+
 		self.obstacle_hit = pygame.image.load('Assets\\Obstacle\\obstacle_1_hit_sprites.png').convert_alpha()
 		self.obstacle_bounced = pygame.image.load('Assets\\Obstacle\\obstacle_1_bounced_sprites.png').convert_alpha()
 		self.obstacle_swim = pygame.image.load('Assets\\Obstacle\\obstacle_1_swimming_sprites.png').convert_alpha()
+
+		self.obstacle_young_hit = pygame.image.load('Assets\\Obstacle\\obstacle_3_hit_sprites.png').convert_alpha()
+		#self.obstacle_young_bounced = pygame.image.load('Assets\\Obstacle\\obstacle_3_bounced_sprites.png').convert_alpha()
+		self.obstacle_young_swim = pygame.image.load('Assets\\Obstacle\\obstacle_3_swimming_sprites.png').convert_alpha()
+
 		self.obstacle_sheets = {'SWIMMING':self.obstacle_swim, 'HIT':self.obstacle_hit, 'BOUNCED':self.obstacle_bounced, 'DEAD':self.obstacle_hit}
+		self.obstacle_young_sheets = {'SWIMMING':self.obstacle_young_swim, 'HIT':self.obstacle_young_hit, 'BOUNCED':self.obstacle_young_hit, 'DEAD':self.obstacle_young_hit}
 		self.snorkle_stomped = pygame.image.load('Assets\\Snorkler\\snorkle_stomped_sprites.png').convert_alpha()
 		self.snorkle_activated = pygame.image.load('Assets\\Snorkler\\snorkle_activated_sprites.png').convert_alpha()
 		self.snorkle_swim = pygame.image.load('Assets\\Snorkler\\snorkle_swimming_sprites.png').convert_alpha()
@@ -135,7 +142,10 @@ class ObstacleManager:
 		surf = pygame.Surface((128, 128)).convert_alpha()
 
 		temp = obs.frame//4
-		surf.blit(self.obstacle_sheets[obs.state], (0,0), ((obs.preset * self.obstacle_sheets[obs.state].get_width()/2) + (temp * 128),0, (obs.preset * self.obstacle_sheets[obs.state].get_width()/2) + ((1+temp) * 128),128))
+		if obs.preset == 2:
+			surf.blit(self.obstacle_young_sheets[obs.state], (0,0), (temp * 128,0,(1+temp) * 128,128))
+		else:
+			surf.blit(self.obstacle_sheets[obs.state], (0,0), ((obs.preset * self.obstacle_sheets[obs.state].get_width()/2) + (temp * 128),0, (obs.preset * self.obstacle_sheets[obs.state].get_width()/2) + ((1+temp) * 128),128))
 		surf = pygame.transform.scale(surf, (obs.OBSTACLE_WIDTH, obs.OBSTACLE_HEIGHT))
 		surf.set_colorkey((0,0,0))
 

@@ -140,11 +140,14 @@ class SwimState(State):
 			#self.goin = True
 		surface.fill((0,153,153))
 		self.game.backgroundManager.render(surface)
+		self.game.shadowManager.render(surface)
 		self.game.obsManager.render(surface)
+		self.game.shadowManager.render_player(surface)
 		self.game.player.render(surface)
 		self.renderHPBar(surface)
 		self.renderMoneyCounter(surface)
 		self.renderProgress(surface)
+
 
 	def reset_play_space(self):
 		self.game.player.reset_counters()

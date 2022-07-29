@@ -155,7 +155,7 @@ class ObstacleManager:
 
 		surf = pygame.Surface((128, 128)).convert_alpha()
 
-		temp = snork.frame//4
+		temp = snork.frame//8
 		surf.blit(self.snorkle_sheets[snork.state], (0,0), (temp*128, 0, (1+temp) * 128,128))
 		surf = pygame.transform.scale(surf, (snork.SNORKLE_WIDTH, snork.SNORKLE_HEIGHT))
 		surf.set_colorkey((0,0,0))

@@ -11,6 +11,7 @@ class BackgroundManager():
 		self.right_img = pygame.transform.flip(self.left_img, True, False)
 		self.left_shore = [ShorePiece(self.left_img, 0, 0)]
 		self.right_shore = [ShorePiece(self.left_img, self.game.WIDTH-16, 0)]
+		self.fill_shores()
 		self.water_effects = []
 
 
@@ -42,15 +43,16 @@ class BackgroundManager():
 		for thing in self.water_effects:
 			thing.render(surface)
 
-		
-
-
-
-
 	def fill_shores(self):
-		pass
-		#for x in range(5):
-			#self.left_shore.append()
+		while self.left_shore[-1].img_rect.y + self.left_shore[-1].img_rect.height < self.game.HEIGHT:
+
+			left_boy = self.left_shore[-1]
+			if left_boy.img_rect.y + left_boy.img_rect.height < self.game.HEIGHT:
+				self.left_shore.append(ShorePiece(self.left_img, 0, left_boy.img_rect.y + left_boy.img_rect.height))
+
+			right_boy = self.right_shore[-1]
+			if right_boy.img_rect.y + right_boy.img_rect.height < self.game.HEIGHT:
+				self.right_shore.append(ShorePiece(self.right_img, self.game.WIDTH - right_boy.img_rect.width, right_boy.img_rect.y + right_boy.img_rect.height))
 
 	def make_water_effect(self):
 		if random.uniform(0,1) < 0.3:

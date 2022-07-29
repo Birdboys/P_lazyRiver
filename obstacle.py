@@ -85,32 +85,6 @@ class Obstacle:
 			self.rect.x = 400 - 10 - self.rect.width
 
 
-class Noodle(Obstacle):
-	NOODLE_WIDTH = 100
-	NOODLE_HEIGHT = 25
-
-	def __init__(self, x, y):
-		self.img = pygame.transform.scale(pygame.image.load('Assets/temp_noodle.png').convert_alpha(),(Noodle.NOODLE_WIDTH, Noodle.NOODLE_HEIGHT))
-		self.rect = pygame.Rect(x, y, Noodle.NOODLE_WIDTH, Noodle.NOODLE_HEIGHT)
-		self.left_rect = pygame.Rect(x,y+1, 1, Noodle.NOODLE_HEIGHT-2)
-		self.right_rect = pygame.Rect(x+Noodle.NOODLE_WIDTH-1,y+1, 1, Noodle.NOODLE_HEIGHT-2)
-		self.top_rect = pygame.Rect(x+5, y, Noodle.NOODLE_WIDTH -6, 1) 
-		self.bottom_rect = pygame.Rect(x+5, y+Noodle.NOODLE_HEIGHT-6, Noodle.NOODLE_WIDTH -2, 1) 
-		self.rect_list = [self.rect, self.left_rect, self.top_rect, self.right_rect, self.bottom_rect]
-		self.type = 'Noodle'
-		
-
-	def update(self):
-		for rect in self.rect_list:
-			rect.y += Obstacle.VEL_Y
-
-	def get_end_screen(self):
-
-		if self.rect.y <= -Noodle.NOODLE_WIDTH:
-			return True
-		else:
-			return False
-
 class Coin(Obstacle):
 
 	COIN_WIDTH = 50
@@ -137,7 +111,7 @@ class Coin(Obstacle):
 			return False
 
 	def get_val(self):
-		if random.uniform(0,1) <= 1:
+		if random.uniform(0,1) <= 0.1:
 			return 5
 		else:
 			return 1
@@ -169,11 +143,12 @@ class Snorkle(Obstacle):
 			self.frame = self.frame % (16 * 4)
 			if (pygame.time.get_ticks()-self.activate_timer)/1000 >= 2:
 				self.state = 'SWIMMING'
+			self.rect.x += self.vel_x / 4 * delta * 60
+			self.rect.y += self.vel_y / 4 * delta * 60
 
 
 		if self.state == 'STOMPED':
-			self.frame = self.frame % (6 * 8)
-			if (pygame.time.get_ticks()-self.activate_timer)/1000 >= 5:
+			if self.frame > 95:
 				self.state = 'GONE'
 				self.used = True
 
@@ -199,4 +174,5 @@ class Snorkle(Obstacle):
 	def stomp(self):
 		self.state = 'STOMPED'
 		self.frame = 0
+		self.activate_timer = pygame.time.get_ticks()
 

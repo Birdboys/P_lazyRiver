@@ -13,6 +13,7 @@ class Player:
 	PLAYER_WIDTH, PLAYER_HEIGHT = 100, 100
 	DUCK_QUACKS = [pygame.mixer.Sound('Assets\\Sounds\\duck_pickup_1.wav'), pygame.mixer.Sound('Assets\\Sounds\\duck_pickup_2.wav')]
 	WHISTLE_BLOW = [pygame.mixer.Sound('Assets\\Sounds\\whistle1.wav'), pygame.mixer.Sound('Assets\\Sounds\\whistle2.wav'), pygame.mixer.Sound('Assets\\Sounds\\whistle3.wav')]
+	LIFEGUARD_YELL = [pygame.mixer.Sound('Assets\\Sounds\\lifeguard_yell.wav')]
 	pygame.mixer.init()
 	def __init__(self, WIDTH, HEIGHT):
 		self.GAME_WIDTH = WIDTH
@@ -20,7 +21,8 @@ class Player:
 		self.img_swim = pygame.image.load('Assets\\Player\\player_swimming_sprites.png').convert_alpha()
 		self.img_hit = pygame.image.load('Assets\\Player\\player_hit_sprites.png').convert_alpha()
 		self.img_bounce = pygame.image.load('Assets\\Player\\player_bouncing_sprites-sheet.png').convert_alpha()
-		self.images = {'SWIMMING':self.img_swim, 'HIT':self.img_hit, 'BOUNCE':self.img_bounce}
+		self.img_end = pygame.image.load('Assets\\Player\\player_end_sprites.png').convert_alpha()
+		self.images = {'SWIMMING':self.img_swim, 'HIT':self.img_hit, 'BOUNCE':self.img_bounce, 'END':self.img_end}
 		self.rect = pygame.Rect(self.GAME_WIDTH//2 - Player.PLAYER_WIDTH//2, 10, Player.PLAYER_WIDTH, Player.PLAYER_HEIGHT)
 		self.vel_x = 0
 		self.vel_y = 0
@@ -35,8 +37,9 @@ class Player:
 		self.frame = 0
 		self.bounce_part_list = []
 		self.coin_part_list = []
+		self.swim_part_list = []
 		self.invincible_time = 0
-		self.dooby = (0,0)
+		self.dooby = (Player.PLAYER_WIDTH,Player.PLAYER_HEIGHT)
 		
 
 	def update(self,screen, obstacles, coins, snorklers, delt, mult):
@@ -103,6 +106,10 @@ class Player:
 
 			self.vel_x = 0
 			self.vel_y = 0
+
+		if self.state == 'END':
+			self.rect.y += -2
+
 		self.update_parts()
 		
 		self.border_check()	
@@ -140,13 +147,18 @@ class Player:
 
 			case _:
 				val = 0
+
 		if self.bounce_part_list:
 			self.render_bounce_parts(screen)
 		image = self.get_sprite(self.images[self.state], 128, 128, (128 * val, 0),(128 * (val + 1), 128), scale)
 		self.dooby = (image.get_width(), image.get_height())
+		if self.swim_part_list:
+			self.render_swim_parts(screen)
 		screen.blit(image, self.rect)
 		if self.coin_part_list:
 			self.render_coin_parts(screen)
+
+
 
 	def reset(self, hp,money):
 		self.bounce_timer = 0
@@ -179,6 +191,7 @@ class Player:
 			case 's':
 				if self.state == 'SWIMMING':
 					self.vel_y += Player.ACCELERATION_Y
+					self.swim_part_list.append(Particle(self.rect.x + self.rect.width//2 + random.uniform(-3,3), self.rect.y + 50, random.uniform(-1,1), random.uniform(-3, -1), (255,255,255), 6, 0))
 					if self.vel_y > self.stats['max_vel_y']:
 						self.vel_y = self.stats['max_vel_y']
 				elif self.state == 'BOUNCE':
@@ -230,8 +243,12 @@ class Player:
 
 	def hit(self):
 		self.hp -= 1
-		if self.hp != 0:
-			Player.WHISTLE_BLOW[random.randint(0,len(Player.WHISTLE_BLOW)-1)].play()
+
+		Player.WHISTLE_BLOW[random.randint(0,len(Player.WHISTLE_BLOW)-1)].play()
+		if self.hp == 0:
+			#Player.LIFEGUARD_YELL[random.randint(0,len(Player.LIFEGUARD_YELL)-1)].play()
+			self.state == 'END'
+
 
 	def obstacle_hit_check(self, obstacles):
 		hit = False
@@ -243,10 +260,14 @@ class Player:
 				obstacle.vel_y = self.vel_y // 3
 				hit = True
 		if hit:
-			self.hit_timer = pygame.time.get_ticks()
-			self.vel_x = self.vel_x * -1
-			self.vel_y = self.vel_y * -1
-			return 'HIT'
+			if self.hp == 0:
+				return 'END'
+			else:
+				self.hit_timer = pygame.time.get_ticks()
+				self.vel_x = self.vel_x * -1
+				self.vel_y = self.vel_y * -1
+				self.part_list = []
+				return 'HIT'
 		else:
 			return 'SWIMMING'
 
@@ -256,9 +277,9 @@ class Player:
 			if pygame.Rect.colliderect(self.rect, coin.rect):
 				self.money += coin.val * mult
 				if coin.val > 1:
-					self.generate_coin_parts((99,199,77))
+					self.generate_coin_parts((99,199,77), (62,137,72))
 				else:
-					self.generate_coin_parts((254,172,54))
+					self.generate_coin_parts((254,172,54), (254,231,97))
 				coins.remove(coin)
 				Player.DUCK_QUACKS[random.randint(0,len(Player.DUCK_QUACKS)-1)].play()
 
@@ -328,6 +349,11 @@ class Player:
 				part.update()
 				if part.radius <= 0:
 					self.coin_part_list.remove(part)
+		if self.swim_part_list:
+			for part in self.swim_part_list:
+				part.update()
+				if part.radius <= 0:
+					self.swim_part_list.remove(part)
 
 	def render_bounce_parts(self, surface):
 		for part in self.bounce_part_list:
@@ -336,21 +362,21 @@ class Player:
 	def render_coin_parts(self, surface):
 		for part in self.coin_part_list:
 			part.render(surface)
+
+	def render_swim_parts(self, surface):
+		for part in self.swim_part_list:
+			part.render(surface)
+
 	def generate_land_parts(self):
 		part_center = (self.rect.x + self.rect.width/2,self.rect.y + self.rect.height/4)
 
 		for x in range(0,40):
 			self.bounce_part_list.append(Particle(part_center[0],part_center[1], random.randint(0,20)/10-1, random.randint(0,20)/10-1, (255,255,255), 8, -.2))
 
-	def generate_swim_parts(self):
+	def generate_coin_parts(self, color1, color2):
 
-		if self.vel_y > 0:
-			for x in range(0,5):
-				part_center = (self.rect.x + self.rect.width/2 + random.randint(-3,3),self.rect.y + self.rect.height)
-				self.bounce_part_list.append(Particle(part_center[0],part_center[1], -self.vel_x/self.stats['max_vel_x'], -1 + self.vel_y, 0.2))
-
-	def generate_coin_parts(self, color):
-		for x in range(0,20):
+		colors = [color1, color2]
+		for x in range(0,30):
 			part_center = (self.rect.x + self.rect.width/2 + random.randint(-50,50),self.rect.y + 3 *self.rect.height/4 + random.randint(-10,10))
-			self.coin_part_list.append(Particle(part_center[0],part_center[1], 0, random.randint(-3,-1), color, random.randint(4,6)))
+			self.coin_part_list.append(Particle(part_center[0],part_center[1], 0, random.uniform(-3,-1), random.choice(colors), random.randint(6,8)))
 			

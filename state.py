@@ -31,9 +31,6 @@ class TitleState(State):
 		self.game = game
 		self.title_img = pygame.image.load('Assets/temp_title_screen.png').convert_alpha()
 		self.title_rect = self.title_img.get_rect()
-		self.img = pygame.transform.scale(pygame.image.load('test.png').convert_alpha(), (300,300))
-		self.img.set_colorkey((0,0,0))
-		self.img_rect = self.img.get_rect()
 
 	def update(self, events, delta):
 
@@ -49,12 +46,12 @@ class TitleState(State):
 
 	def render(self, surface):
 		surface.blit(self.title_img, (0,0))
-		surface.blit(self.img, self.img_rect)
 
 class SwimState(State):
 
 	FPS = 60
-	MONEY_FONT = pygame.font.Font("Assets/m5x7.ttf",48)
+	MONEY_FONT = pygame.font.Font("Assets/m5x7.ttf",35)
+	MONEY_FONT.bold = True
 	BACKGROUND_COLOR = (0,153,153)
 	def __init__(self, game):
 		State.__init__(self, game)
@@ -62,12 +59,12 @@ class SwimState(State):
 		self.game.player.rect.y = 10
 		pygame.time.set_timer(self.game.events['SPAWN'], self.game.spawn_timer, 1)
 
-		self.hp_render_img = pygame.transform.scale(pygame.image.load('Assets\\UI\\player_hp_sprites.png').convert_alpha(), (48,48))
+		self.hp_render_img = pygame.transform.scale(pygame.image.load('Assets\\UI\\player_hp_sprites.png').convert_alpha(), (35,35))
 		self.hp_render_rect = self.hp_render_img.get_rect()
 		self.hp_render_text = SwimState.MONEY_FONT.render(str(self.game.player_stats['hp']), True, (0,0,0))
 		self.hp_render_text_rect = self.hp_render_text.get_rect()
 		
-		self.money_render_img = pygame.transform.scale(pygame.image.load('Assets\\UI\\player_money_sprites.png').convert_alpha(), (48,48))
+		self.money_render_img = pygame.transform.scale(pygame.image.load('Assets\\UI\\player_money_sprites.png').convert_alpha(), (35,35))
 		self.money_render_rect = self.money_render_img.get_rect()
 		self.money_render_text = SwimState.MONEY_FONT.render(str(self.game.player_stats['money']), True, (0,0,0))
 		self.money_render_text_rect = self.money_render_text.get_rect()
@@ -113,7 +110,9 @@ class SwimState(State):
 		if keys_pressed[pygame.K_p]:
 			self.game.playing = False
 			self.game.spawn_buffer = pygame.time.get_ticks()
-			new_state = PauseState(self.game)
+			self.game.prev_state = self
+			temp_surf = self.render(pygame.Surface((self.game.WIDTH, self.game.HEIGHT)))
+			new_state = PauseState(self.game, temp_surf)
 			new_state.enter_state()
 
 		self.game.backgroundManager.update(delta)
@@ -155,6 +154,9 @@ class SwimState(State):
 		self.renderMoneyCounter(surface)
 		self.renderProgress(surface)
 
+		if self.game.prev_state == self:
+			return surface
+
 
 	def reset_play_space(self):
 		self.game.player.reset_counters()
@@ -172,23 +174,25 @@ class SwimState(State):
 
 	def initUI(self):
 		self.hp_render_rect.x = 20
-		self.hp_render_text_rect.x = 40
-		self.hp_render_rect.y = 4
-		self.hp_render_text_rect.y = 6
+		self.hp_render_text_rect.x = 45
+		self.hp_render_rect.y = 10
+		self.hp_render_text_rect.y = 300
 
 		self.money_render_rect.x = self.game.WIDTH - self.money_render_rect.width - 20 - self.money_render_text_rect.width
-		self.money_render_rect.y = 0
+		self.money_render_rect.y = 10
 		self.money_render_text_rect.x = self.game.WIDTH - 20 - self.money_render_text_rect.width
-		self.money_render_text_rect.y = 6
+		self.money_render_text_rect.y = 20
 
 	def renderHPBar(self, surface):
 		self.hp_render_rect.x = 20
-		self.hp_render_text_rect.x = 20 + self.hp_render_rect.width
+		self.hp_render_text_rect.x = 25 + self.hp_render_rect.width
+		self.hp_render_text_rect.y = 10
 		surface.blit(self.hp_render_img, self.hp_render_rect)
 		surface.blit(self.hp_render_text, self.hp_render_text_rect)
 
 	def renderMoneyCounter(self, surface):
-		self.money_render_rect.x = self.game.WIDTH - self.money_render_rect.width - 20 - self.money_render_text_rect.width
+		self.money_render_rect.x = self.game.WIDTH - self.money_render_rect.width - 25 - self.money_render_text_rect.width
+		self.money_render_text_rect.y = 10
 		self.money_render_text_rect.x = self.game.WIDTH - 20 - self.money_render_text_rect.width
 		surface.blit(self.money_render_img, self.money_render_rect)
 		surface.blit(self.money_render_text, self.money_render_text_rect)
@@ -205,7 +209,8 @@ class SwimState(State):
 		surface.blit(self.prog_enemy_img, (self.prog_background.x+temp - 24 + 10, 20), (self.prog_enemy_frame//8 * val, 0, val, self.prog_enemy_img.get_height()))
 
 class StartSwimState(State):
-	START_FONT = pygame.font.Font("Assets/m5x7.ttf",44)
+	START_FONT = pygame.font.Font("Assets/m5x7.ttf",56)
+	START_FONT.bold = True
 	def __init__(self, game):
 		State.__init__(self, game)
 
@@ -221,7 +226,7 @@ class StartSwimState(State):
 
 		self.player_images = pygame.image.load("Assets\\TransitionStuff\\player_cash.png")
 		self.pusher_images = pygame.image.load("Assets\\TransitionStuff\\pusher_animation.png")
-		self.pusher_rect = pygame.Rect(self.game.WIDTH//2 - self.game.player.rect.width//2, 460, Obstacle.OBSTACLE_WIDTH, Obstacle.OBSTACLE_HEIGHT)
+		self.pusher_rect = pygame.Rect(self.game.WIDTH//2 - self.game.player.rect.width//2, 360, Obstacle.OBSTACLE_WIDTH, Obstacle.OBSTACLE_HEIGHT)
 		self.pusher_vel_x = 0
 		self.pusher_vel_y = 0
 
@@ -229,10 +234,12 @@ class StartSwimState(State):
 		self.shadow = pygame.image.load("Assets\\shadow.png").convert_alpha()
 
 		self.num_img = pygame.image.load('Assets\\UI\\pause_num_sprites.png').convert_alpha()
-		self.num_img_rect = pygame.Rect((self.game.WIDTH//2 - self.game.WIDTH//8 , self.game.HEIGHT//2 - self.game.HEIGHT//4, self.game.WIDTH//4, self.game.HEIGHT//4))
+		self.num_img_rect = pygame.Rect((self.game.WIDTH//2 - self.game.WIDTH//8 , self.game.HEIGHT//2 - self.game.HEIGHT//8, self.game.WIDTH//4, self.game.HEIGHT//4))
 
-		self.start_text = StartSwimState.START_FONT.render(str('Press any key to start'), True, (0,0,0),(255,255,255))
-		self.start_text_x, self.start_text_y = self.game.WIDTH//2 - self.start_text.get_width()//2,  self.game.HEIGHT//2 - self.start_text.get_height()//2
+		self.start_text_1 = StartSwimState.START_FONT.render(str('Press any key'), True, (255,255,255))
+		self.start_text_2 = StartSwimState.START_FONT.render(str('to start'), True, (255,255,255))
+		self.start_text_x, self.start_text_y = self.game.WIDTH//2 - self.start_text_1.get_width()//2,  self.game.HEIGHT//2 - self.start_text_1.get_height()//2 - 10
+		self.start_text_2_x, self.start_text_2_y  = self.game.WIDTH//2 - self.start_text_2.get_width()//2,  self.start_text_y + self.start_text_1.get_height()
 		self.obstacle_list = []
 		self.rotations = []
 		self.begin = False
@@ -251,27 +258,35 @@ class StartSwimState(State):
 
 	def update(self, events, delta):
 		
+		keys_pressed = pygame.key.get_pressed()
 		for event in events:
 			if event.type == pygame.QUIT:
 				self.game.running = False
 				self.game.playing = False
-			elif event.type == pygame.KEYDOWN and not self.begin:
+			elif event.type == pygame.KEYDOWN and not self.begin and not keys_pressed[pygame.K_p]:
 				self.frame = 0
 				self.begin = True
 				self.num_val = 0
 				self.push_timer = pygame.time.get_ticks()
 				self.pusher_vel_y = -1
 				self.pusher_vel_x = random.uniform(-2,2)
-				print(self.pusher_vel_x)
+		
+		if keys_pressed[pygame.K_p]:
+			self.game.playing = False
+			self.game.spawn_buffer = pygame.time.get_ticks()
+			self.game.prev_state = self
+			temp_surf = self.render(pygame.Surface((self.game.WIDTH, self.game.HEIGHT)))
+			new_state = PauseState(self.game, temp_surf)
+			new_state.enter_state() 
+
 		if not self.begin:
 			self.ob_bob()
 			self.frame = (self.frame + 1) % 120
 		else:
 			delta = pygame.time.get_ticks() - self.push_timer
-			if delta >= 4000:
+			if delta >= 4500:
 				self.get_collisions()
 				self.edge_check()
-				self.num_val = -1
 				self.game.player.rect.y += 4
 				self.pusher_rect.x += self.pusher_vel_x
 				self.pusher_rect.y += self.pusher_vel_y
@@ -280,8 +295,6 @@ class StartSwimState(State):
 				for obstacle in self.obstacle_list:
 					obstacle.rect.x += obstacle.vel_x
 					obstacle.rect.y += obstacle.vel_y
-					#obstacle.update(delta)
-					#print(obstacle.vel_x)
 
 				for part in self.part_list:
 					part.update()
@@ -290,6 +303,8 @@ class StartSwimState(State):
 					self.game.state_stack.pop()
 					new_state = SwimState(self.game)
 					new_state.enter_state()
+			elif delta >= 4000:
+				self.num_val = -1
 			elif delta >= 3000:
 				self.ob_bob()
 				self.num_val = 2
@@ -321,15 +336,20 @@ class StartSwimState(State):
 		self.game.shadowManager.render_shadow(surface, self.pusher_rect)
 		surface.blit(self.get_pusher_sprite(), self.pusher_rect)
 		if not self.begin:
-			if self.frame // 30 < 3:
-				surface.blit(self.start_text, (self.start_text_x, self.start_text_y))	
+			if self.frame // 30 < 3 and self.game.prev_state != self:
+				surface.blit(self.start_text_1, (self.start_text_x, self.start_text_y))	
+				surface.blit(self.start_text_2, (self.start_text_2_x, self.start_text_2_y))	
 		else:
-			if self.num_val >= 0:
-				surface.blit(self.get_num(), self.num_img_rect)
-			else:
+			
+			if self.num_val < 0:
 				for part in self.part_list:
 					part.render(surface)
 		surface.blit(self.get_player_sprite(), self.game.player.rect)
+		if self.num_val >= 0:
+			surface.blit(self.get_num(), self.num_img_rect)
+
+		if self.game.prev_state == self:
+			return surface
 	
 	def renderProgress(self, surface):
 		pygame.draw.rect(surface, (139,155,180), self.prog_background)
@@ -343,7 +363,7 @@ class StartSwimState(State):
 
 	def initPlayer(self):
 		self.game.player.rect.x = self.game.WIDTH//2 - self.game.player.rect.width//2
-		self.game.player.rect.y = self.game.HEIGHT - self.game.HEIGHT//3 + 30
+		self.game.player.rect.y = self.game.HEIGHT - self.game.HEIGHT//3 - 70
 
 	def initObstacles(self):
 		num_tries = 0
@@ -385,7 +405,7 @@ class StartSwimState(State):
 	def add_obstacle(self):
 		obx = random.randint(16,400 - Obstacle.OBSTACLE_WIDTH - 16)
 		oby = random.randint(0, self.game.HEIGHT - Obstacle.OBSTACLE_HEIGHT - 50)
-		return Obstacle(obx, oby)
+		return Obstacle(obx, oby, random.randint(0,360))
 
 	def get_obs_sprite(self, obs):
 		surf = pygame.Surface((128, 128)).convert_alpha()
@@ -410,7 +430,7 @@ class StartSwimState(State):
 		else:
 			delta = pygame.time.get_ticks() - self.push_timer
 			
-			if delta > 4000:
+			if delta > 4500:
 				if self.pusher_vel_x < -0.5:
 					surf.blit(self.pusher_images, (0,0), (self.pusher_images.get_width()//7 * 5, 0, self.pusher_images.get_height(), self.pusher_images.get_height()))
 				elif self.pusher_vel_x > 0.5:
@@ -472,9 +492,7 @@ class StartSwimState(State):
 						speed = math.sqrt(obstacle.vel_x**2 + obstacle.vel_y**2)
 						other_obstacle.vel_x = unit_x * speed
 						other_obstacle.vel_y = unit_y * speed
-						#print(speed, unit_x * speed, unit_y * spee)
 			if pygame.Rect.colliderect(obstacle.rect, self.pusher_rect):
-				#print(speed, unit_x * speed, unit_y * spee)
 				unit_x, unit_y = self.normalize(self.pusher_rect.x, self.pusher_rect.y, obstacle.rect.x, obstacle.rect.y)
 				speed = math.sqrt(self.pusher_vel_x**2 + self.pusher_vel_y**2)
 				obstacle.vel_x = unit_x * speed
@@ -482,15 +500,12 @@ class StartSwimState(State):
 
 			if pygame.Rect.colliderect(obstacle.rect, self.game.player.rect):
 				unit_x, unit_y = self.normalize(self.game.player.rect.x, self.game.player.rect.y, obstacle.rect.x, obstacle.rect.y)
-				speed = math.sqrt(self.game.player.vel_x**2 + self.game.player.vel_y**2)
+				speed = 4
 				obstacle.vel_x = unit_x * speed
 				obstacle.vel_y = unit_y * speed
 
 	def normalize(self, x1, y1, x2, y2):
 		mag = math.sqrt((x2-x1)**2 + (y2-y1)**2)
-		#dir_x = x1 - x2
-		#dir_y = y1 - y2
-		#print(mag)
 		return (x2-x1)/mag, (y2-y1)/mag 
 
 	def edge_check(self):
@@ -503,24 +518,29 @@ class StartSwimState(State):
 
 class PauseState(State):
 
+	PAUSE_FONT = pygame.font.Font("Assets/m5x7.ttf",96)
+	PAUSE_FONT.bold = True
+
 	MENU_TIMER = pygame.USEREVENT+3
 	FPS = 10
-	def __init__(self, game):
+	def __init__(self, game, surface):
 		State.__init__(self, game)
 		self.game.playing = False
-		self.resume = Button('temp_resume_button','temp_resume_button') 
-		self.exit = Button('temp_exit_button','temp_exit_button') 
-		self.buttons = [self.resume, self.exit]
+		self.play_sheet = pygame.image.load('Assets\\UI\\button_play_sprites.png')
+		self.quit_sheet = pygame.image.load('Assets\\UI\\button_quit_sprites.png')
+		self.tut_sheet = pygame.image.load('Assets\\UI\\button_tut_sprites.png')
+		self.credits_sheet = pygame.image.load('Assets\\UI\\button_credits_sprites.png')
 		self.index = 0
 		self.initMenu()
+		self.background_img = self.greyscale(surface)
 		self.can_move = True
 
 	def initMenu(self):
-		self.game.game_canvas.fill((0,0,0))
-		self.buttons[0].rect.x = 50
-		self.buttons[0].rect.y = 200
-		self.buttons[1].rect.x = 50
-		self.buttons[1].rect.y = self.game.HEIGHT-300
+		self.play = Button(self.play_sheet, self.game.WIDTH//2 - Button.BUTTON_WIDTH//2, 64, 0)
+		self.quit = Button(self.quit_sheet, self.game.WIDTH//2 - Button.BUTTON_WIDTH//2, 256, 23)
+		self.tut = Button(self.tut_sheet, self.game.WIDTH//2 - Button.BUTTON_WIDTH//2, 448, 57)
+		self.cred = Button(self.credits_sheet, self.game.WIDTH//2 - Button.BUTTON_WIDTH//2, 638, 76)
+		self.buttons = [self.play, self.quit, self.tut, self.cred]
 
 	def update(self, events , delta):
 
@@ -530,7 +550,7 @@ class PauseState(State):
 				self.game.running = False
 			if event.type == self.game.events['SPAWN']:
 				self.game.spawn_buffer = pygame.time.get_ticks() - self.game.spawn_buffer
-			if event.type == ShopState.MENU_TIMER:
+			if event.type == PauseState.MENU_TIMER:
 				self.can_move = True
 
 		keys_pressed = pygame.key.get_pressed()
@@ -538,34 +558,41 @@ class PauseState(State):
 			if keys_pressed[pygame.K_w]:
 				self.index = (self.index - 1) % len(self.buttons)
 				self.can_move = False
-				pygame.time.set_timer(ShopState.MENU_TIMER, 150, 1)
+				pygame.time.set_timer(PauseState.MENU_TIMER, 150, 1)
 			if keys_pressed[pygame.K_s]:
 				self.index = (self.index + 1) % len(self.buttons)
 				self.can_move = False
-				pygame.time.set_timer(ShopState.MENU_TIMER, 150, 1)
+				pygame.time.set_timer(PauseState.MENU_TIMER, 150, 1)
 
 		if keys_pressed[pygame.K_RETURN]:
 			if self.index == 0:
 				self.game.playing = True
 				pygame.time.set_timer(self.game.events['SPAWN'], self.game.spawn_buffer, 1)
 				self.game.spawn_buffer = 0
+				self.game.prev_state = None
 				self.exit_state()
 
 			elif self.index == 1:
 				self.game.playing = False
 				self.game.running = False
 
+		self.buttons[self.index].update()
+
+	def greyscale(self, surface: pygame.Surface):
+	    arr = pygame.surfarray.pixels3d(surface)
+	    mean_arr = np.dot(arr[:,:,:], [0.216, 0.587, 0.144])
+	    mean_arr3d = mean_arr[..., np.newaxis]
+	    new_arr = np.repeat(mean_arr3d[:, :, :], 3, axis=2)
+	    return pygame.surfarray.make_surface(new_arr)
+
 	def render(self, surface):
-		surface.fill((0,0,0))
-		for x in range(len(self.buttons)):
-			if not self.index == x:
-				self.buttons[x].render(surface)
-			else:
-				self.buttons[x].render_hover(surface)
+		surface.blit(self.background_img, (0,0))
+		for button in self.buttons:
+			button.render(surface)
 
 class ShopState(State):
 
-	SHOP_FONT = pygame.font.Font("Assets/m5x7.ttf",78)
+	SHOP_FONT = pygame.font.Font("Assets/m5x7.ttf", 64)
 	SHOP_FONT.bold = True
 	MENU_TIMER = pygame.USEREVENT+3
 	SHOP_ROW = 2
@@ -576,6 +603,9 @@ class ShopState(State):
 		self.index_x = 0
 		self.img = pygame.image.load('Assets\\Background\\shop_background_sprites.png').convert_alpha()
 		self.img_rect = pygame.Rect(0,0,self.game.WIDTH, self.game.HEIGHT)
+
+		self.cursor_images = pygame.image.load('Assets\\UI\\shop_cursor_sprites.png')
+		self.cursor_rect = pygame.Rect(0, 0, ShopItem.ITEM_WIDTH, ShopItem.ITEM_HEIGHT)
 		self.index_y = 0
 		self.store = []
 		self.initItems()
@@ -584,6 +614,7 @@ class ShopState(State):
 		self.player_money_rect = self.player_money_render.get_rect()
 		self.player_money_rect.y = 655
 		self.frame = 0
+		self.cursor_frame = 0
 
 	def update(self, events , delta):
 		for event in events:
@@ -622,19 +653,15 @@ class ShopState(State):
 
 			if keys_pressed[pygame.K_RETURN]:
 				i = self.index_y*2 + self.index_x
-				#print(self.store[i].val_cur, self.store[i].val_max, self.game.player_stats['money'])
 				if self.store[i].val_cur < self.store[i].val_max and self.game.player_stats['money'] >= self.store[i].costs[self.store[i].val_cur]:
 					self.game.player_stats['money'] = self.game.player_stats['money'] - self.store[i].costs[self.store[i].val_cur]
 					self.store[i].val_cur += 1
 
 					if i == 0: #IF SPEED BOUGHT
-						#print("SPEED")
 						self.game.increasePlayerSpeed()
 					elif i == 1: #IF HP BOUGHT
-						#print("HP")
 						self.game.increasePlayerHP()
 					elif i == 2: #IF NOODLE BOUGHT
-						#print("NOODLE")
 						self.game.increasePlayerMoneyMult()
 				
 				if i == 3: #IF SPEEDO BOUGHT
@@ -646,7 +673,9 @@ class ShopState(State):
 				pygame.time.set_timer(ShopState.MENU_TIMER, 150, 1)	
 
 		self.updateItems()
-		self.frame = (self.frame + 1) % (4 * 4)
+		self.updateCursor()
+		self.frame = (self.frame + 1) % (10 * 4)
+		self.cursor_frame = (self.cursor_frame + 1) % 60
 	def render(self, surface):
 
 		surface.blit(self.get_background(), self.img_rect)
@@ -657,6 +686,8 @@ class ShopState(State):
 				self.store[ROW*2+COLUMN].render(surface)
 
 		surface.blit(self.player_money_render,self.player_money_rect)
+		if self.cursor_frame < 30:
+			surface.blit(self.get_cursor(), self.cursor_rect)
 				
 	def initItems(self):
 		self.store.append(self.speedUpgrade())
@@ -692,14 +723,30 @@ class ShopState(State):
 		for item in self.store:
 			item.update()
 
+	def updateCursor(self):
+		ind = self.index_y*2 + self.index_x
+		self.cursor_rect.x, self.cursor_rect.y = self.store[ind].img_rect.x, self.store[ind].img_rect.y
+	
 	def get_background(self):
 		surf = pygame.Surface((self.img.get_width()/8, self.img.get_height()))
 		temp = not self.can_move
-		frame_temp = self.frame//4
+		frame_temp = self.frame//10
 		surf.blit(self.img, (0,0), (temp * self.img.get_width()/2 + frame_temp*self.img.get_width()/8, 0, temp*self.img.get_width()/2 + (frame_temp+1)*self.img.get_width()/8, self.img.get_height()))
 		surf = pygame.transform.scale(surf, (self.game.WIDTH, self.game.HEIGHT))
 		return surf
 
+	def get_cursor(self):
+		surf = pygame.Surface((self.cursor_images.get_width()/2, self.cursor_images.get_height()))
+		ind = self.index_y*2 + self.index_x
+		if not self.game.player_stats['money'] < self.store[ind].get_cost():
+			surf.blit(self.cursor_images, (0,0), (0, 0, self.cursor_images.get_width()/2, self.cursor_images.get_height()))
+		else:
+			surf.blit(self.cursor_images, (0,0), (self.cursor_images.get_width()/2, 0, self.cursor_images.get_width(), self.cursor_images.get_height()))
+
+		surf.convert_alpha()
+		surf.set_colorkey((0,0,0))
+
+		return surf
 class ShopEnterTransition(State):
 	def __init__(self, game):
 		self.img = pygame.image.load('Assets\\Background\\shop_background_enter.png').convert_alpha()
@@ -868,16 +915,29 @@ class CountdownState(State):
 
 class Button():
 
-	def __init__(self, img, img_hover):
-		self.img = pygame.image.load('Assets/%s.png'%(img)).convert_alpha()
-		self.img_hover = pygame.transform.flip(self.img, True, False)
-		self.rect = self.img.get_rect()
+	BUTTON_WIDTH = 256
+
+	def __init__(self, sheet, x, y, frame):
+		self.img_sheet = sheet
+		self.x, self.y = x, y
+		self.frame = frame
+	
+	def update(self):
+		self.frame = (self.frame + 1) % (12 * 8)
 
 	def render(self, surface):
-		surface.blit(self.img, self.rect)
+		surface.blit(self.get_sprite(), (self.x, self.y))
 
-	def render_hover(self, surface):
-		surface.blit(self.img_hover, self.rect)
+	def get_sprite(self):
+		temp = self.frame//8
+		temp_surf = pygame.Surface((256, 150)) 
+		w, h = self.img_sheet.get_width()//12, self.img_sheet.get_height()
+		temp_surf.blit(self.img_sheet, (0,0), (temp * w, 0, (temp+1)*w, h))
+		temp_surf.convert_alpha()
+		temp_surf.set_colorkey((0,0,0))
+		return temp_surf
+
+
 
 
 class ShopItem():
@@ -909,11 +969,10 @@ class ShopItem():
 		else:
 			self.price_render = ShopItem.ITEM_FONT.render(str(self.costs[self.val_cur]), True, (0,0,0))
 		self.val_render = ShopItem.ITEM_FONT.render("%s/%s"%(self.val_cur,self.val_max), True, (0,0,0))
-		self.frame = self.frame % (8 * 2) 
+		self.frame = self.frame % 35 
 
 	def render(self, surface):
 		self.progress_rect_border = pygame.Rect((self.img_rect.x, self.img_rect.y + self.img_rect.height), (ShopItem.ITEM_WIDTH, 20))
-		#print(self.img_rect.width)
 		if self.val_max == 0:
 			self.progress_rect = pygame.Rect((self.progress_rect_border.x + 5, self.progress_rect_border.y + 5), (self.progress_rect_border.width-10, self.progress_rect_border.height-10))
 		else:
@@ -937,7 +996,10 @@ class ShopItem():
 
 	def get_sprite(self):
 		surf = pygame.Surface((ShopItem.ITEM_WIDTH, ShopItem.ITEM_HEIGHT)).convert_alpha()
-		temp = self.frame//8
+		temp = self.frame//12
 		surf.blit(self.img, (0,0), (ShopItem.ITEM_WIDTH * temp, 0, ShopItem.ITEM_WIDTH * (temp + 1), ShopItem.ITEM_HEIGHT))
 		surf.set_colorkey((0,0,0))
 		return surf
+
+	def get_cost(self):
+		return self.costs[self.val_cur]

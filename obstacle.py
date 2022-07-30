@@ -6,7 +6,7 @@ class Obstacle:
 
 	OBSTACLE_WIDTH = 80
 	OBSTACLE_HEIGHT = 80 
-	def __init__(self, x, y):
+	def __init__(self, x, y, rot):
 		self.rect = pygame.Rect(x, y, Obstacle.OBSTACLE_WIDTH, Obstacle.OBSTACLE_HEIGHT)
 		self.type = 'Obstacle'
 		self.vel_x = 0
@@ -16,6 +16,7 @@ class Obstacle:
 		self.frame = 0
 		self.hit_timer = 0
 		self.bounced_timer = 0
+		self.rot = rot
 
 	"""def render(self, screen):
 		screen.blit(self.img, self.rect)"""

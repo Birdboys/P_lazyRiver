@@ -14,7 +14,7 @@ class ShadowManager():
 			surface.blit(pygame.transform.scale(self.shadow, (obstacle.rect.width, obstacle.rect.height)), self.shift_rect(obstacle.rect, 7))
 
 		for coin in self.game.obsManager.coin_list: 
-			surface.blit(pygame.transform.scale(self.shadow, (coin.rect.width, coin.rect.height)), self.shift_rect(coin.rect, 3))
+			surface.blit(pygame.transform.scale(self.shadow, (coin.rect.width, coin.rect.height)), self.shift_rect(coin.rect, 5))
 
 		#for snorkle in self.game.obsManager.snorkle_list: 
 			#surface.blit(pygame.transform.scale(self.shadow, (snorkle.rect.width, snorkle.rect.height)), snorkle.rect) 

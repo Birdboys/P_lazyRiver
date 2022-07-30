@@ -63,7 +63,7 @@ class ObstacleManager:
 
 	def add_obstacle(self):
 		obx = random.randint(16,400 - Obstacle.OBSTACLE_WIDTH - 16)
-		return Obstacle(obx, 820 + (random.randint(-50,50)))
+		return Obstacle(obx, 820 + (random.randint(-50,50)), random.randint(0,360))
 
 	def add_coin(self):
 		obx = random.randint(16,400 - Coin.COIN_WIDTH - 16)
@@ -174,5 +174,12 @@ class ObstacleManager:
 		surf.set_colorkey((0,0,0))
 
 		return surf
+
+	def rot_center(self, image, angle, x, y):
+	    
+	    rotated_image = pygame.transform.rotate(image, angle)
+	    new_rect = rotated_image.get_rect(center = image.get_rect(center = (x, y)).center)
+
+	    return rotated_image, new_rect
 
 
